@@ -1,0 +1,32 @@
+
+
+Dump was called from src/cpu.cpp file, execute_commands function, 185
+
+DUMP OF NUM_BUFFER
+  ip = 0 >>[  0] =  1
+           [  1] = 100
+           [  2] =  1
+           [  3] = -50
+           [  4] =  1
+           [  5] =  3
+           [  6] =  2
+           [  7] =  2
+           [  8] =  1
+           [  9] =  5
+           [ 10] =  2
+           [ 11] =  3
+           [ 12] =  0
+
+DUMP OF BUFFER
+
+DUMP OF STACK
+   [0] = NAN(POISON)
+   [1] = NAN(POISON)
+   [2] = NAN(POISON)
+   [3] = NAN(POISON)
+   [4] = NAN(POISON)
+   [5] = NAN(POISON)
+   [6] = NAN(POISON)
+   [7] = NAN(POISON)
+   [8] = NAN(POISON)
+   [9] = NAN(POISON)

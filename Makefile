@@ -1,9 +1,9 @@
-all : mkdir assembler
+all : mkdir assembler cpu
 SRC_DIR = src/
 OBJ_DIR = obj/
 CC = g++
 
-CFLAGS=#-D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
+CFLAGS= -Wall #-D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
 -Wc++14-compat -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts -Wconditionally-supported \
 -Wconversion -Wctor-dtor-privacy -Wempty-body -Wfloat-equal -Wformat-nonliteral -Wformat-security -Wformat-signedness -Wformat=2 -Winline -Wlogical-op \
 -Wnon-virtual-dtor -Wopenmp-simd -Woverloaded-virtual -Wpacked -Wpointer-arith -Winit-self -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo \
@@ -13,8 +13,11 @@ CFLAGS=#-D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop
 -fno-omit-frame-pointer -fPIE -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr \
 -pie -Wlarger-than=8192 -Wstack-usage=8192
 
-assembler : $(OBJ_DIR)stack_func.o $(OBJ_DIR)input_output.o $(OBJ_DIR)debug_funcs.o $(OBJ_DIR)assembler.o 
-	@$(CC) $(CFLAGS) $(OBJ_DIR)stack_func.o $(OBJ_DIR)input_output.o $(OBJ_DIR)debug_funcs.o $(OBJ_DIR)assembler.o -o assembler
+cpu : $(OBJ_DIR)stack_func.o $(OBJ_DIR)input_output.o $(OBJ_DIR)debug_funcs.o $(OBJ_DIR)cpu.o
+	@$(CC) $(CFLAGS) $(OBJ_DIR)stack_func.o $(OBJ_DIR)input_output.o $(OBJ_DIR)debug_funcs.o $(OBJ_DIR)cpu.o -o cpu
+
+assembler : $(OBJ_DIR)assembler.o
+	@$(CC) $(CFLAGS) $(OBJ_DIR)assembler.o -o assembler
 
 $(OBJ_DIR)stack_func.o : $(SRC_DIR)stack_func.cpp
 	@$(CC) $(CFLAGS) $(SRC_DIR)stack_func.cpp -c -o $(OBJ_DIR)stack_func.o
@@ -28,8 +31,12 @@ $(OBJ_DIR)debug_funcs.o : $(SRC_DIR)debug_funcs.cpp
 $(OBJ_DIR)assembler.o : $(SRC_DIR)assembler.cpp
 	@$(CC) $(CFLAGS) $(SRC_DIR)assembler.cpp -c -o $(OBJ_DIR)assembler.o
 
+$(OBJ_DIR)cpu.o : $(SRC_DIR)cpu.cpp
+	@$(CC) $(CFLAGS) $(SRC_DIR)cpu.cpp -c -o $(OBJ_DIR)cpu.o
+
+
 mkdir :
 	@mkdir $(OBJ_DIR) -p
 
 clean:
-	rm $(OBJ_DIR)*.o *.save assembler
+	rm $(OBJ_DIR)*.o *.save assembler cpu

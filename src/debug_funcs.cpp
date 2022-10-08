@@ -144,7 +144,7 @@ long hash(void* v_arr, size_t size)
 
     long hash = 0;
     unsigned int tmp1  = 0, tmp2 = 0;
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
         hash += ((int) arr[i]) & 0x0000000F;
 

@@ -177,7 +177,7 @@ int stack_poison_get(Stack *stk, size_t size, size_t capacity)
 {
     ASSERT_OK(stk);
     size_t i = size;
-    for (i; i < capacity; i++)
+    for (; i < capacity; i++)
     {
         *(stk->data + i) = NAN;
     }

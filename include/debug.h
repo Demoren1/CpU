@@ -14,17 +14,29 @@ void close_logs();
 
 #define LOG_FILE (assert(log_file != NULL && "Maybe you forgot to open log_file"), log_file)                               
 
-#define SHOW_ELEMENTS(stk)  for(ssize_t counter = stk.size - 1; counter >= 0; counter--)          \
-                            {                                                                     \
-                                fprintf(elements, "[%3ld] = %3g, ", counter, stk.data[counter]);  \
-                                if (counter % 10 == 0)                                            \
-                                    fprintf(elements, "\n");                                      \
-                            }                                                                     \
-                            fprintf(elements, "\n");                 
+#define SHOW_ELEMENTS(stk, file)    for(ssize_t counter = stk.size - 1; counter >= 0; counter--)          \
+                                    {                                                                     \
+                                        fprintf(file, "[%3ld] = %3g, ", counter, stk.data[counter]);  \
+                                        if (counter % 10 == 0)                                            \
+                                            fprintf(file, "\n");                                      \
+                                    }                                                                     \
+                                    fprintf(file, "\n");                 
+
+
+#define SHOW_INFO_OF_CODES(structure)   printf("buff_size %zd \n", structure.num_of_sym);           \
+                                        printf("num of str %zd \n", structure.num_of_lines);        \
+                                        for (size_t i = 0; i < structure.num_of_sym; i++)           \
+                                        printf("%c", structure.buffer[i]);                         \
+                                        for (size_t i = 0; i < structure.num_of_lines; i++)         \
+                                        printf("%s\n", structure.text[i]);                          
+#define FUNC_GENERAL_INFO()  __FILE__, __FUNCTION__, __LINE__
+
+#define DUMP_CPU_NOT_BIN(info_of_executable_file, ip, stk)    dump_not_bin_cpu(&info_of_executable_file, ip, stk, FUNC_GENERAL_INFO());      
 
 #define ASSERTED() stack_print_in_logs(__LINE__, __FUNCTION__, __FILE__);
 
-FILE *elements = fopen("elements_of_stack.txt", "w");                 
+
+                 
 
 
 enum errors 
