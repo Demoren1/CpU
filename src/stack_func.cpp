@@ -145,8 +145,7 @@ int stack_dtor(Stack *stk)
 int stack_resize(Stack *stk, ssize_t new_capacity)
 {   
     ASSERT_OK(stk);
-
-    elem* tmp_ptr = (elem*) realloc((char*)stk->data ON_CANARY_PROT(- sizeof(canary_t)), new_capacity * sizeof(elem) ON_CANARY_PROT(+ 2 * sizeof(elem)));
+    elem* tmp_ptr = (elem*) realloc((char*)stk->data ON_CANARY_PROT(- sizeof(canary_t)),256 + new_capacity * sizeof(elem) ON_CANARY_PROT(+ 2 * sizeof(elem)));
     if (tmp_ptr == NULL)
     {   
         stk->capacity = -1;

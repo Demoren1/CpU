@@ -13,11 +13,11 @@ CFLAGS= -Wall #-D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressi
 -fno-omit-frame-pointer -fPIE -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr \
 -pie -Wlarger-than=8192 -Wstack-usage=8192
 
-cpu : $(OBJ_DIR)stack_func.o $(OBJ_DIR)input_output.o $(OBJ_DIR)debug_funcs.o $(OBJ_DIR)cpu.o
-	@$(CC) $(CFLAGS) $(OBJ_DIR)stack_func.o $(OBJ_DIR)input_output.o $(OBJ_DIR)debug_funcs.o $(OBJ_DIR)cpu.o -o cpu
+cpu : $(OBJ_DIR)stack_func.o $(OBJ_DIR)input_output.o $(OBJ_DIR)debug_funcs.o $(OBJ_DIR)cpu.o $(OBJ_DIR)cpu_funcs.o
+	@$(CC) $(CFLAGS) $(OBJ_DIR)stack_func.o $(OBJ_DIR)input_output.o $(OBJ_DIR)debug_funcs.o $(OBJ_DIR)cpu.o $(OBJ_DIR)cpu_funcs.o -o cpu
 
-assembler : $(OBJ_DIR)assembler.o
-	@$(CC) $(CFLAGS) $(OBJ_DIR)assembler.o -o assembler
+assembler : $(OBJ_DIR)assembler.o $(OBJ_DIR)ass_funcs.o
+	@$(CC) $(CFLAGS) $(OBJ_DIR)assembler.o $(OBJ_DIR)ass_funcs.o -o assembler
 
 $(OBJ_DIR)stack_func.o : $(SRC_DIR)stack_func.cpp
 	@$(CC) $(CFLAGS) $(SRC_DIR)stack_func.cpp -c -o $(OBJ_DIR)stack_func.o
@@ -33,6 +33,13 @@ $(OBJ_DIR)assembler.o : $(SRC_DIR)assembler.cpp
 
 $(OBJ_DIR)cpu.o : $(SRC_DIR)cpu.cpp
 	@$(CC) $(CFLAGS) $(SRC_DIR)cpu.cpp -c -o $(OBJ_DIR)cpu.o
+
+$(OBJ_DIR)ass_funcs.o : $(SRC_DIR)ass_funcs.cpp
+	@$(CC) $(CFLAGS) $(SRC_DIR)ass_funcs.cpp -c -o $(OBJ_DIR)ass_funcs.o
+
+$(OBJ_DIR)cpu_funcs.o : $(SRC_DIR)cpu_funcs.cpp
+	@$(CC) $(CFLAGS) $(SRC_DIR)cpu_funcs.cpp -c -o $(OBJ_DIR)cpu_funcs.o
+
 
 
 mkdir :

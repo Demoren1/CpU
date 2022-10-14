@@ -1,23 +1,22 @@
 
 
-Dump was called from src/cpu.cpp file, execute_commands function, 185
+Dump was called from src/cpu_funcs.cpp file, execute_commands function, 169
 
 DUMP OF NUM_BUFFER
-  ip = 0 >>[  0] =  1
-           [  1] = 100
-           [  2] =  1
-           [  3] = -50
-           [  4] =  1
-           [  5] =  3
-           [  6] =  2
-           [  7] =  2
-           [  8] =  1
-           [  9] =  5
-           [ 10] =  2
-           [ 11] =  3
-           [ 12] =  0
+  ip = 0 >>[  0] = 65
+           [  1] = 13
+           [  2] = 258
+           [  3] =  1
+           [  4] = 257
+           [  5] =  1
+           [  6] = 31
+           [  7] =  0
 
-DUMP OF BUFFER
+DUMP OF REGISTERS
+rax = 0
+rbx = 0
+rcx = 0
+rdx = 0
 
 DUMP OF STACK
    [0] = NAN(POISON)
@@ -30,3 +29,15 @@ DUMP OF STACK
    [7] = NAN(POISON)
    [8] = NAN(POISON)
    [9] = NAN(POISON)
+   [10] = NAN(POISON)
+   [11] = NAN(POISON)
+   [12] = NAN(POISON)
+   [13] = NAN(POISON)
+   [14] = NAN(POISON)
+   [15] = NAN(POISON)
+   [16] = NAN(POISON)
+   [17] = NAN(POISON)
+   [18] = NAN(POISON)
+   [19] = NAN(POISON)
+
+DUMP OF RAM

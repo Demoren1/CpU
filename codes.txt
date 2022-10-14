@@ -1,9 +1,4 @@
-push 100
-push -50
-push 3
-add
-add
-push 5
-add 
-out
+push 1
+push [rax]
+out 
 hlt

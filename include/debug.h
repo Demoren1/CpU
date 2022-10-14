@@ -23,15 +23,11 @@ void close_logs();
                                     fprintf(file, "\n");                 
 
 
-#define SHOW_INFO_OF_CODES(structure)   printf("buff_size %zd \n", structure.num_of_sym);           \
-                                        printf("num of str %zd \n", structure.num_of_lines);        \
-                                        for (size_t i = 0; i < structure.num_of_sym; i++)           \
-                                        printf("%c", structure.buffer[i]);                         \
-                                        for (size_t i = 0; i < structure.num_of_lines; i++)         \
-                                        printf("%s\n", structure.text[i]);                          
+#define DUMP_ASS(structure, labels, size)   dump_ass(structure, labels, size, FUNC_GENERAL_INFO())
+
 #define FUNC_GENERAL_INFO()  __FILE__, __FUNCTION__, __LINE__
 
-#define DUMP_CPU_NOT_BIN(info_of_executable_file, ip, stk)    dump_not_bin_cpu(&info_of_executable_file, ip, stk, FUNC_GENERAL_INFO());      
+#define DUMP_CPU(info_of_executable_file, ip, stk)    dump_cpu(&info_of_executable_file, ip, stk, FUNC_GENERAL_INFO());      
 
 #define ASSERTED() stack_print_in_logs(__LINE__, __FUNCTION__, __FILE__);
 
