@@ -8,9 +8,17 @@ int main()
     fgets(str, 256, stdin);
     
     int len = strlen(str);
-    for (int i = 0; i < len; i++)
+    printf("push 0      ##%s", str);
+
+    for (int i = len - 1; i >= 0; i--)
     {
-        printf("%5d(%c)", str[i], str[i]);
+        printf("push %d\n", str[i]);
     }
+
+    for (int i = 0; i < len + 1; i++)
+    {
+        printf("pop [%d]\n", i);
+    }
+
     return 0;
 }

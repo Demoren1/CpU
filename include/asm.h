@@ -51,6 +51,8 @@ typedef int var_ass;
 
 pair get_arg(char *str);
 
+const char *name_of_input_file(int num_of_str, const char* str);
+
 size_t know_size_for_buff(FILE* text, const char * name_of_file);
 
 void fill_info_of_codes(ass_info *info_of_codes, FILE* file_ptr, const char* file_path);

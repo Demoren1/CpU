@@ -1,33 +1,7 @@
-push 0          ##Hello world!
-push 10
-push 33
-push 100
-push 108
-push 114
-push 111
-push 119
-push 32
-push 111
-push 108
-push 108
-push 101
-push 72
-
-pop [0]
-pop [1]
-pop [2]
-pop [3]
-pop [4]
-pop [5]
-pop [6]
-pop [7]
-pop [8]
-pop [9]
-pop [10]
-pop [11]
-pop [12]
-pop [13]
-
-dump
-show
+push 3
+push 1
+jb :end
+end:
+push 228
+out 
 hlt

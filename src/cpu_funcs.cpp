@@ -14,13 +14,11 @@ extern FILE* cpu_logs;
 
 void check_executable_file(FILE *exec_file_ptr, Cpu_struct *cpu)
 {
-    char *extension = (char*) calloc(1, sizeof(char*));
-    assert(extension != NULL);
+    char extension[128] = {};
 
     int version = 0;
 
-    char *first_line = (char*) calloc(32, sizeof(char *));
-    assert(first_line != NULL);
+    char first_line[128] = {};
 
     fgets(first_line, 32, exec_file_ptr);
     
@@ -36,8 +34,6 @@ void check_executable_file(FILE *exec_file_ptr, Cpu_struct *cpu)
     assert(version == cpu->version);
 
     //printf("%s %d % zd\n", extension, version, cpu->num_of_commands);
-    free(extension);
-    free(first_line);
 }
 
 size_t know_size_for_buff(FILE* text, const char * name_of_file)
@@ -103,8 +99,8 @@ void do_not_bin_instructions(FILE* exec_not_bin_file_ptr, const char* path_to_ex
 
     open_logs();
     STACK_CTOR(cpu.stack, 10);
-    STACK_CTOR(cpu.func_stack, 5);
     
+    STACK_CTOR(cpu.func_stack, 5);
 
     check_executable_file(exec_not_bin_file_ptr, &cpu);
 
@@ -190,7 +186,7 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
         full_cmd = cmd;
         (cmd != DUMP_CMD) && (cmd = cmd & MASK_CMD);
 
-        // printf("cmd = %0x (%d)\n", cmd, cmd);
+        printf("cmd = %0x (%d)\n", cmd, cmd);
         // printf("full_cmd = %0x(%d) \n", full_cmd, full_cmd);
 
         // sleep(0.5);
@@ -474,14 +470,12 @@ void do_bin_instructions(FILE* exec_bin_file_ptr, const char* path_to_executable
 
 void check_executable_bin_file(FILE *exec_file_bin, Cpu_struct *cpu)
 {
-    int *first_line = (int*) calloc(2, sizeof(int));
+    int first_line[64] = {};
     
     fread(first_line, sizeof(int), 2, exec_file_bin);
     
     assert(first_line[0] == 'C' + 'P' * 256);
     assert(first_line[1] == VERSION);
-    
-    free(first_line);
 }
 
 void fill_cpu_struct_bin (FILE *exec_file_bin, Cpu_struct *cpu, const char *path_to_bin_file)
@@ -501,7 +495,7 @@ void fill_cpu_struct_bin (FILE *exec_file_bin, Cpu_struct *cpu, const char *path
 
 void find_num_of_commands(FILE *exec_file_bin, Cpu_struct *cpu)
 {
-    int *first_line = (int*) calloc(1, sizeof(int));
+    int first_line[64] = {};
     assert(first_line != NULL);
     
     int test_fread = 0;
@@ -509,12 +503,11 @@ void find_num_of_commands(FILE *exec_file_bin, Cpu_struct *cpu)
     assert(test_fread != 0);
 
     cpu->num_of_commands = first_line[0];
-    
-    free(first_line);
 }
 
 void dtor_exec_bin(Cpu_struct *cpu)
-{
+{   
+    free(cpu->buffer);
     free(cpu->num_buffer);
 }
 

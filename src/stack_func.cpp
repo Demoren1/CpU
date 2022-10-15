@@ -15,8 +15,9 @@ int stack_ctor(Stack *stk, ssize_t capacity, const char* name_function, const ch
 
         ASSERT_OK(stk);
     }
-
-    stk->data   = (elem*) calloc(1, capacity * (sizeof(elem)+1) ON_CANARY_PROT(+ 2 * sizeof(canary_t))); 
+    assert(stk->data == nullptr);
+    stk->data   = (elem*) calloc(1, capacity * (sizeof(elem)) ON_CANARY_PROT(+ 2 * sizeof(canary_t))); 
+    
     ON_CANARY_PROT 
     (
     (*((canary_t*)stk->data) = ARR_CANARY);   

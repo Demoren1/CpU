@@ -22,11 +22,12 @@ void compile(FILE *executable_file, ass_info *info_of_codes)
 
 
     while (line < info_of_codes->num_of_lines)
-    {
+    {   
+        // DBG;
         sscanf(info_of_codes->text[line], "%s%n", cmd, &shift);
-        
+        // DBG;
         char* args_begin = info_of_codes->text[line] + shift + 1;
-
+        // DBG;
         // printf("cmd = %s\n", cmd);
         // printf("ip = %d\n", ip);
         // printf("label num = %d , label sym = %c\n", label_ptr, label_sym);
@@ -232,14 +233,13 @@ var_ass get_args(ass_info *info_of_codes, char *text, int *arr_of_commands, int 
             char label_name[128] = {};
             
             sscanf(text, " :%s", label_name);
-            
             label_ptr = find_address(label_name, info_of_codes);
-            
             // printf("label name = %s\n", label_name);
+            // printf("label ptr = %d\n", label_ptr);
             // printf("addres from func = %d\n", info_of_codes->labels[label_ptr].address);
 
-            write_to_files(executable_file, info_of_codes->arr_of_commands, info_of_codes->labels[label_ptr].address, ip, '\n');
-
+            if (info_of_codes->labels[label_ptr].address != -1)
+                write_to_files(executable_file, info_of_codes->arr_of_commands, info_of_codes->labels[0].address, ip, '\n');
             break;
         }
     }
@@ -544,13 +544,18 @@ int find_address(char *label_name, ass_info *info_of_codes)
         address++;
     }
     
-    if (address == 0)
+    if (address == SIZE_OF_LABELS_ARR)
     {
-        if (strcmp(label_name, info_of_codes->labels[address].label_name) == 0)
-            return 0;
-        else
-            return 0;
+        return -1;
     }
     else
         return address;
+}
+
+const char *name_of_input_file(int num_of_str, const char* str)
+{
+    if (num_of_str > 1)
+        return str;
+    else 
+        return "codes.txt";
 }

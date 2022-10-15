@@ -10,9 +10,9 @@
 
 FILE* ass_logs = open_with_no_buff("ass_logs", "w");
 
-int main()
-{
-    const char* path_to_codes = "codes.txt";
+int main(int argc, char* argv[])
+{    
+    const char* path_to_codes = name_of_input_file(argc, argv[1]);
     const char* path_to_executable_file = "executable_file.txt";
     const char* path_to_executable_file_bin = "executable_file.bin";
 
@@ -44,6 +44,7 @@ int main()
     fclose(file_text);
     fclose(executable_file);
     fclose(executable_file_bin);
+    fclose(ass_logs);
     return 0;
 }
 
