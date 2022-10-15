@@ -36,7 +36,7 @@ int main()
     
     compile(executable_file, &info_of_codes);
     
-    DUMP_ASS (&info_of_codes, info_of_codes.labels, SIZE_OF_LABELS_ARR);
+    DUMP_ASS (&info_of_codes, SIZE_OF_LABELS_ARR);
 
     fwrite(info_of_codes.arr_of_commands, sizeof(int), info_of_codes.num_commands, executable_file_bin);
 

@@ -101,8 +101,10 @@ void do_not_bin_instructions(FILE* exec_not_bin_file_ptr, const char* path_to_ex
        
     struct Cpu_struct cpu ={};
 
-    STACK_CTOR(cpu.stack, 20);
     open_logs();
+    STACK_CTOR(cpu.stack, 10);
+    STACK_CTOR(cpu.func_stack, 5);
+    
 
     check_executable_file(exec_not_bin_file_ptr, &cpu);
 
@@ -113,6 +115,8 @@ void do_not_bin_instructions(FILE* exec_not_bin_file_ptr, const char* path_to_ex
     dtor_exec_no_bin(&cpu);
     
     close_logs();
+    stack_dtor(&cpu.stack);
+    stack_dtor(&cpu.func_stack);
 }
 
 void dump_cpu(Cpu_struct *cpu, ssize_t ip, Stack *stk, const char* file_name, const char* func_name, int num_of_line)
@@ -151,9 +155,20 @@ void dump_cpu(Cpu_struct *cpu, ssize_t ip, Stack *stk, const char* file_name, co
         else 
             fprintf(cpu_logs," * [%d] = %g\n", i, stk->data[i]);
     }
+    
+    // printf("capacity %d\n", cpu->func_stack.capacity);
+    
+    fputs("\nDUMP OF FUNC STACK\n", cpu_logs);
+    for (int i = 0; i < cpu->func_stack.capacity; i++)
+    {
+        if (isnan(cpu->func_stack.data[i])) 
+            fprintf(cpu_logs,"   [%d] = %s\n", i, "NAN(POISON)");
+        else 
+            fprintf(cpu_logs," * [%d] = %g\n", i, cpu->func_stack.data[i]);
+    }
 
     fputs("\nDUMP OF RAM\n", cpu_logs);
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < SIZE_OF_RAM; i++)
     {
         if (cpu->RAM[i] != 0)
             fprintf(cpu_logs, "[%3d] = %3d\n", i, cpu->RAM[i]);
@@ -175,7 +190,7 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
         full_cmd = cmd;
         (cmd != DUMP_CMD) && (cmd = cmd & MASK_CMD);
 
-        // printf("cmd = %0x\n", cmd);
+        // printf("cmd = %0x (%d)\n", cmd, cmd);
         // printf("full_cmd = %0x(%d) \n", full_cmd, full_cmd);
 
         // sleep(0.5);
@@ -267,12 +282,13 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
 
         else if (cmd == DIV_CMD)
         {
-            double num1 = 0, num2 =0;
-            int num = ((int)num1) / ((int) num2);
+            elem num1 = 0, num2 =0;
             
             stack_pop(stack, &num1);            
             stack_pop(stack, &num2);
 
+            int num = ((int)num1) / ((int) num2);
+            
             stack_push(stack, (elem) num);
         }
 
@@ -301,7 +317,8 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
 
         else if(cmd == JMP_CMD)
         {
-            ip = (ssize_t)cpu->num_buffer[ip++];
+            ip = (ssize_t)cpu->num_buffer[ip];
+            ip++;
         }
 
         else if(cmd == JAE_CMD)
@@ -312,7 +329,8 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             stack_pop(stack, &num2);
             if (num1 >= num2)
             {
-                ip = (ssize_t)cpu->num_buffer[ip++];
+                ip = (ssize_t)cpu->num_buffer[ip];
+                ip++;
             }
             else 
                 ip++;
@@ -326,7 +344,8 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             stack_pop(stack, &num2);
             if (num1 > num2)
             {
-                ip = (ssize_t)cpu->num_buffer[ip++];
+                ip = (ssize_t)cpu->num_buffer[ip];
+                ip++;
             }
             else 
                 ip ++;
@@ -340,7 +359,8 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             stack_pop(stack, &num2);
             if (num1 <= num2)
             {
-                ip = (ssize_t)cpu->num_buffer[ip++];
+                ip = (ssize_t)cpu->num_buffer[ip];
+                ip++;
             }
             else 
                 ip ++;
@@ -354,7 +374,8 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             stack_pop(stack, &num2);
             if (num1 < num2)
             {
-                ip = (ssize_t)cpu->num_buffer[ip++];
+                ip = (ssize_t)cpu->num_buffer[ip];
+                ip++;
             }
             else 
                 ip ++;
@@ -368,7 +389,8 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             stack_pop(stack, &num2);
             if (num1 == num2)
             {
-                ip = (ssize_t)cpu->num_buffer[ip++];
+                ip = (ssize_t)cpu->num_buffer[ip];
+                ip++;
             }
             else 
                 ip ++;
@@ -382,10 +404,28 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             stack_pop(stack, &num2);
             if (num1 != num2)
             {
-                ip = (ssize_t)cpu->num_buffer[ip++];
+                ip = (ssize_t)cpu->num_buffer[ip];
+                ip++;
             }
             else 
                 ip ++;
+        }
+
+        else if(cmd == CALL_CMD)
+        {   
+            stack_push(&(cpu->func_stack), (elem)ip);
+
+            ip = (ssize_t)cpu->num_buffer[ip];
+            ip++;
+        }
+
+        else if(cmd == RET_CMD)
+        {   
+            elem func_addres = 0;
+            stack_pop(&(cpu->func_stack), &func_addres);
+
+            ip = (ssize_t) func_addres;
+            ip++;
         }
 
         else if(cmd == DUP_CMD)
@@ -395,6 +435,15 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             stack_pop(stack, &num);
             stack_push(stack, num);
             stack_push(stack, num);
+        }
+        else if(cmd == SHOW_CMD)
+        {
+            int counter = 0;
+            while ((cpu->RAM[counter] != '\0') && (counter < SIZE_OF_RAM))
+            {
+                printf("%c", cpu->RAM[counter]);
+                counter++;
+            }
         }
     }
 }
@@ -407,8 +456,8 @@ void do_bin_instructions(FILE* exec_bin_file_ptr, const char* path_to_executable
 
 
     Stack stack ={};
-    STACK_CTOR(stack, 10);
     open_logs();
+    STACK_CTOR(stack, 10);
 
     struct Cpu_struct cpu ={};
     
@@ -420,6 +469,7 @@ void do_bin_instructions(FILE* exec_bin_file_ptr, const char* path_to_executable
 
     dtor_exec_bin(&cpu);
     close_logs();
+    stack_dtor(&cpu.stack);
 }
 
 void check_executable_bin_file(FILE *exec_file_bin, Cpu_struct *cpu)
@@ -467,3 +517,4 @@ void dtor_exec_bin(Cpu_struct *cpu)
 {
     free(cpu->num_buffer);
 }
+

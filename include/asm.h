@@ -20,25 +20,44 @@
                             write_to_files(executable_file, info_of_codes->arr_of_commands, rdx, ip, '\n');             \
                         }
 
+const int ACCURACY = 100;
 
 const int SIZE_OF_LABELS_ARR = 100;
+
+typedef struct Labels_
+{
+    char label_name[128];
+    int address;
+} Labels_t;
 
 struct ass_info
 {
     char** text;
     char* buffer;
     int *arr_of_commands;
-    int labels[SIZE_OF_LABELS_ARR];
+    Labels_t labels[SIZE_OF_LABELS_ARR];
     size_t num_of_lines;
     size_t num_commands;
     size_t num_of_sym;
 };
 
+struct pair
+{
+    int type; // create enum: REG, MUNBER, etc ...
+    int value;
+};
+
 typedef int var_ass;
+
+pair get_arg(char *str);
 
 size_t know_size_for_buff(FILE* text, const char * name_of_file);
 
 void fill_info_of_codes(ass_info *info_of_codes, FILE* file_ptr, const char* file_path);
+
+const char *find_label_name(char *str);
+
+int find_address(char *label_name, ass_info *info_of_codes);
 
 int make_ptr_arr_of_lines(ass_info *info_of_codes);
 
@@ -48,9 +67,9 @@ void compile(FILE *executable_file, ass_info *info_of_codes);
 
 void write_header_of_bin_file(FILE *exec_bin_file, const char* extension, int version, int num_of_commands);
 
-void fill_labels_bad_values(int *labels, int SIZE_OF_LABELS_ARR);
+void fill_labels_bad_values(Labels_t *labels, int SIZE_OF_LABELS_ARR);
 
-void dump_ass (ass_info *info_of_codes, int* labels, int size, const char* file_name, const char* func_name, int line);
+void dump_ass (ass_info *info_of_codes, int size, const char* file_name, const char* func_name, int line);
 
 FILE* open_with_no_buff(const char* name_file, const char* regime);
 
@@ -83,15 +102,17 @@ enum CPU_codes
     JNE_CMD  = 15,
     CALL_CMD = 16,
     RET_CMD  = 17,
+    SHOW_CMD = 18,
     OUT_CMD  = 31,
 };
 
 enum Registers
-{
+{   
     rax = 1,
     rbx = 2,
     rcx = 3,
-    rdx = 4
+    rdx = 4,
+    rex = ACCURACY,
 };
 
 enum Masks

@@ -1,4 +1,4 @@
-const int SIZE_OF_RAM = 1024;
+const int SIZE_OF_RAM = 4096;
 
 struct Cpu_struct
 {
@@ -11,6 +11,7 @@ struct Cpu_struct
     int  *num_buffer;
     int registers[5] = {};
     int RAM[SIZE_OF_RAM] = {};
+    Stack func_stack;
 };
 
 void execute_commands(Cpu_struct *cpu, Stack *stack, FILE *file_result);

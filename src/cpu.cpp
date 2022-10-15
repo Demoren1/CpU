@@ -36,5 +36,9 @@ int main()
     fclose(exec_not_bin_file_ptr);
     fclose(cpu_logs);
     fclose(file_result);
+    fclose(stk_out_file);
+    fclose(exec_bin_file_ptr);
+    fclose(file_result_bin);
+    
     return 1;
 }

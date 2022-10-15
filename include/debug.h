@@ -22,8 +22,9 @@ void close_logs();
                                     }                                                                     \
                                     fprintf(file, "\n");                 
 
+#define WRITE_LOG (...) 
 
-#define DUMP_ASS(structure, labels, size)   dump_ass(structure, labels, size, FUNC_GENERAL_INFO())
+#define DUMP_ASS(structure, size)   dump_ass(structure, size, FUNC_GENERAL_INFO())
 
 #define FUNC_GENERAL_INFO()  __FILE__, __FUNCTION__, __LINE__
 

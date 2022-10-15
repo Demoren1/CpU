@@ -35,7 +35,7 @@ unsigned int stack_error(Stack *stk)                //todo check stk and syk->da
             (
             stk->code_of_error |= CHECK((size_t) *((size_t*)((char*) stk->data - sizeof(ARR_CANARY))) != ARR_CANARY,                               STACK_ERROR_ARR_LEFT_CANARY_DIED);
             
-            stk->code_of_error |= CHECK((size_t) *((size_t*)((char*)stk->data +  stk->capacity * sizeof(elem) + sizeof(ARR_CANARY))) != ARR_CANARY, STACK_ERROR_ARR_RIGHT_CANARY_DIED);
+            stk->code_of_error |= CHECK((size_t) *((size_t*)((char*)stk->data +  stk->capacity * sizeof(elem) /*+ sizeof(ARR_CANARY)*/)) != ARR_CANARY, STACK_ERROR_ARR_RIGHT_CANARY_DIED);
             )
 
             ON_HASH_PROT

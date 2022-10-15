@@ -16,12 +16,12 @@ int stack_ctor(Stack *stk, ssize_t capacity, const char* name_function, const ch
         ASSERT_OK(stk);
     }
 
-    stk->data   = (elem*) calloc(1, capacity * sizeof(elem) ON_CANARY_PROT(+ 2 * sizeof(canary_t))); 
+    stk->data   = (elem*) calloc(1, capacity * (sizeof(elem)+1) ON_CANARY_PROT(+ 2 * sizeof(canary_t))); 
     ON_CANARY_PROT 
     (
-    (*((canary_t*)stk->data) = ARR_CANARY); 
-    stk->data = (elem*)((canary_t*)stk->data + 1);     
+    (*((canary_t*)stk->data) = ARR_CANARY);   
     *((canary_t*)((char*)stk->data +  capacity * sizeof(elem) + sizeof(canary_t))) = ARR_CANARY; //todo  write(1, ptr, 0) == -1
+    stk->data = (elem*)((canary_t*)stk->data + 1);
     )
 
     stk->capacity      = capacity;
@@ -37,7 +37,6 @@ int stack_ctor(Stack *stk, ssize_t capacity, const char* name_function, const ch
 
     ON_HASH_PROT(stack_rehash(stk));       
     
-
     ASSERT_OK(stk);
     
     stk->dump_info ={};
@@ -48,7 +47,7 @@ int stack_ctor(Stack *stk, ssize_t capacity, const char* name_function, const ch
     stack_poison_get(stk, stk->size, stk->capacity);
     
     ASSERT_OK(stk);
-
+    
     return stk->code_of_error;
 }   
 
@@ -81,17 +80,19 @@ int stack_push(Stack *stk, elem value)
 
     stk->data[stk->size] = value;
     stk->size++;
-    
+
     ON_HASH_PROT(stack_rehash(stk));
+
     ASSERT_OK(stk);
-    
+        
     return stk->code_of_error;
 }
 
 elem stack_pop(Stack *stk, elem *value)
-{
+{   
+    
     ASSERT_OK(stk);
-
+    
     if (stk->size <= 0)
     {
         stk->code_of_error |= STACK_ERROR_POP_FROM_VOID_STACK;
@@ -108,9 +109,9 @@ elem stack_pop(Stack *stk, elem *value)
     {
         stack_resize(stk, stk->capacity / 2);
     }
-
+    
     *value = stk->data[stk->size-1];
-
+    
     stack_poison_get(stk, stk->size, stk->capacity);
     stk->size--;
 
@@ -145,8 +146,10 @@ int stack_dtor(Stack *stk)
 int stack_resize(Stack *stk, ssize_t new_capacity)
 {   
     ASSERT_OK(stk);
-    elem* tmp_ptr = (elem*) realloc((char*)stk->data ON_CANARY_PROT(- sizeof(canary_t)),256 + new_capacity * sizeof(elem) ON_CANARY_PROT(+ 2 * sizeof(elem)));
-    if (tmp_ptr == NULL)
+    
+    stk->data = (elem*) realloc((char*)stk->data ON_CANARY_PROT(- sizeof(canary_t)), new_capacity * (sizeof(elem)+1) ON_CANARY_PROT(+ 2 * sizeof(elem)));
+    
+    if (stk->data == NULL)
     {   
         stk->capacity = -1;
         stk->flag |= WRONG_REALLOC;
@@ -154,20 +157,19 @@ int stack_resize(Stack *stk, ssize_t new_capacity)
         ASSERT_OK(stk);
     }
 
-    stk->data     = tmp_ptr;
     stk->capacity = new_capacity;
     ON_CANARY_PROT
     (
     *((canary_t*)stk->data) = ARR_CANARY;                   //todo to func
-    stk->data   = (elem*)((canary_t*)stk->data + 1);     
     *((canary_t*)((char*)stk->data +  new_capacity * sizeof(elem) + sizeof(canary_t))) = ARR_CANARY;
+    stk->data   = (elem*)((canary_t*)stk->data + 1);
     )
 
     ON_HASH_PROT(stack_rehash(stk));
     
     stack_poison_get(stk, stk->size, stk->capacity);
     
-    ASSERT_OK(stk);
+    ASSERT_OK(stk);    
 
     return stk->code_of_error;
 }
