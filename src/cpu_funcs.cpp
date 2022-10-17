@@ -189,7 +189,7 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
         printf("cmd = %0x (%d)\n", cmd, cmd);
         // printf("full_cmd = %0x(%d) \n", full_cmd, full_cmd);
 
-        // sleep(0.5);
+        // sleep(1);
 
         if (cmd == HLT_CMD)
         {
@@ -263,7 +263,7 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             stack_pop(stack, &num1);            
             stack_pop(stack, &num2);
 
-            stack_push(stack, num1 * num2);
+            stack_push(stack, num1 * num2 / ACCURACY);
         }
 
         else if (cmd == SUB_CMD)
@@ -283,7 +283,7 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             stack_pop(stack, &num1);            
             stack_pop(stack, &num2);
 
-            int num = ((int)num1) / ((int) num2);
+            int num = (int)(num1 * ACCURACY) / ((int) num2);
             
             stack_push(stack, (elem) num);
         }
@@ -294,6 +294,7 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             
             scanf("%lf", &in_num);
 
+            in_num *= ACCURACY;
             stack_push(stack, in_num);
         }
 
@@ -302,7 +303,7 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             double num = 0;
             stack_pop(stack, &num);
             fprintf(file_result, "%d", (int)num);
-            fprintf(stdout, "%d \n", (int)num);
+            fprintf(stdout, "%g \n", (num / ACCURACY));
 
         }
 
@@ -312,9 +313,8 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
         }
 
         else if(cmd == JMP_CMD)
-        {
-            ip = (ssize_t)cpu->num_buffer[ip];
-            ip++;
+        {   
+            ip = (ssize_t)cpu->num_buffer[ip];            
         }
 
         else if(cmd == JAE_CMD)
@@ -326,9 +326,8 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             if (num1 >= num2)
             {
                 ip = (ssize_t)cpu->num_buffer[ip];
-                ip++;
             }
-            else 
+            else
                 ip++;
         }
 
@@ -341,10 +340,9 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             if (num1 > num2)
             {
                 ip = (ssize_t)cpu->num_buffer[ip];
-                ip++;
             }
-            else 
-                ip ++;
+            else
+                ip++;
         }
 
         else if(cmd == JBE_CMD)
@@ -356,10 +354,9 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             if (num1 <= num2)
             {
                 ip = (ssize_t)cpu->num_buffer[ip];
-                ip++;
             }
-            else 
-                ip ++;
+            else
+                ip++;
         }
 
         else if(cmd == JB_CMD)
@@ -371,10 +368,9 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             if (num1 < num2)
             {
                 ip = (ssize_t)cpu->num_buffer[ip];
-                ip++;
             }
-            else 
-                ip ++;
+            else
+                ip++;
         }
 
         else if(cmd == JEE_CMD)
@@ -386,10 +382,9 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             if (num1 == num2)
             {
                 ip = (ssize_t)cpu->num_buffer[ip];
-                ip++;
-            }
-            else 
-                ip ++;
+            }        
+            else
+                ip++;    
         }
 
         else if(cmd == JNE_CMD)
@@ -401,10 +396,9 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             if (num1 != num2)
             {
                 ip = (ssize_t)cpu->num_buffer[ip];
-                ip++;
             }
-            else 
-                ip ++;
+            else
+                ip++;
         }
 
         else if(cmd == CALL_CMD)
@@ -412,7 +406,6 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
             stack_push(&(cpu->func_stack), (elem)ip);
 
             ip = (ssize_t)cpu->num_buffer[ip];
-            ip++;
         }
 
         else if(cmd == RET_CMD)

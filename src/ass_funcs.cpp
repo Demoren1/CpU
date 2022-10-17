@@ -239,7 +239,7 @@ var_ass get_args(ass_info *info_of_codes, char *text, int *arr_of_commands, int 
             // printf("addres from func = %d\n", info_of_codes->labels[label_ptr].address);
 
             if (info_of_codes->labels[label_ptr].address != -1)
-                write_to_files(executable_file, info_of_codes->arr_of_commands, info_of_codes->labels[0].address, ip, '\n');
+                write_to_files(executable_file, info_of_codes->arr_of_commands, info_of_codes->labels[label_ptr].address, ip, '\n');
             break;
         }
     }

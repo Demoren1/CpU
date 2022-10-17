@@ -1,6 +1,6 @@
-all : mkdir assembler cpu
-SRC_DIR = src/
-OBJ_DIR = obj/
+all : mkdir assembler cpu 
+SRC_DIR = ./src/
+OBJ_DIR = ./obj/
 CC = g++
 
 CFLAGS= -save-temps -Wall  -fsanitize=address -g #-D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
@@ -13,37 +13,32 @@ CFLAGS= -save-temps -Wall  -fsanitize=address -g #-D _DEBUG -ggdb3 -std=c++20 -O
 -fno-omit-frame-pointer -fPIE -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr \
 -pie -Wlarger-than=8192 -Wstack-usage=8192
 
-cpu : $(OBJ_DIR)stack_func.o $(OBJ_DIR)input_output.o $(OBJ_DIR)debug_funcs.o $(OBJ_DIR)cpu.o $(OBJ_DIR)cpu_funcs.o
-	@$(CC) $(CFLAGS) $(OBJ_DIR)stack_func.o $(OBJ_DIR)input_output.o $(OBJ_DIR)debug_funcs.o $(OBJ_DIR)cpu.o $(OBJ_DIR)cpu_funcs.o -o cpu
-
-assembler : $(OBJ_DIR)assembler.o $(OBJ_DIR)ass_funcs.o
-	@$(CC) $(CFLAGS) $(OBJ_DIR)assembler.o $(OBJ_DIR)ass_funcs.o -o assembler
-
-$(OBJ_DIR)stack_func.o : $(SRC_DIR)stack_func.cpp
-	@$(CC) $(CFLAGS) $(SRC_DIR)stack_func.cpp -c -o $(OBJ_DIR)stack_func.o
-
-$(OBJ_DIR)input_output.o : $(SRC_DIR)input_output.cpp
-	@$(CC) $(CFLAGS) $(SRC_DIR)input_output.cpp -c -o $(OBJ_DIR)input_output.o
-
-$(OBJ_DIR)debug_funcs.o : $(SRC_DIR)debug_funcs.cpp
-	@$(CC) $(CFLAGS) $(SRC_DIR)debug_funcs.cpp -c -o $(OBJ_DIR)debug_funcs.o
-
-$(OBJ_DIR)assembler.o : $(SRC_DIR)assembler.cpp
-	@$(CC) $(CFLAGS) $(SRC_DIR)assembler.cpp -c -o $(OBJ_DIR)assembler.o
-
-$(OBJ_DIR)cpu.o : $(SRC_DIR)cpu.cpp
-	@$(CC) $(CFLAGS) $(SRC_DIR)cpu.cpp -c -o $(OBJ_DIR)cpu.o
-
-$(OBJ_DIR)ass_funcs.o : $(SRC_DIR)ass_funcs.cpp
-	@$(CC) $(CFLAGS) $(SRC_DIR)ass_funcs.cpp -c -o $(OBJ_DIR)ass_funcs.o
-
-$(OBJ_DIR)cpu_funcs.o : $(SRC_DIR)cpu_funcs.cpp
-	@$(CC) $(CFLAGS) $(SRC_DIR)cpu_funcs.cpp -c -o $(OBJ_DIR)cpu_funcs.o
+#sources
+ASM_SRC := $(SRC_DIR)ass_funcs.cpp $(SRC_DIR)assembler.cpp 
+ASM_OBJ := $(patsubst $(SRC_DIR)%.cpp, $(OBJ_DIR)%.o, $(ASM_SRC))
 
 
+CPU_SRC := $(SRC_DIR)cpu_funcs.cpp $(SRC_DIR)cpu.cpp $(SRC_DIR)debug_funcs.cpp $(SRC_DIR)input_output.cpp $(SRC_DIR)stack_func.cpp
+CPU_OBJ := $(patsubst $(SRC_DIR)%.cpp, $(OBJ_DIR)%.o, $(CPU_SRC))
+
+#exe
+ASM_EXE := assembler
+CPU_EXE := cpu
+
+$(ASM_EXE) : $(ASM_OBJ) 
+	$(CC) $(CFLAGS) $(ASM_OBJ) -o $(ASM_EXE)
+
+$(OBJ_DIR)%.o : $(SRC_DIR)%.cpp 
+	$(CC) -c $< -o $@
+
+$(CPU_EXE) : $(CPU_OBJ) 
+	$(CC) $(CFLAGS) $(CPU_OBJ) -o $(CPU_EXE)
+
+$(OBJ_DIR)%.o : $(SRC_DIR)%.cpp
+	$(CC) -c $< -o $@
 
 mkdir :
 	@mkdir $(OBJ_DIR) -p
 
 clean:
-	rm $(OBJ_DIR)*.o *.save assembler cpu
+	rm $(OBJ_DIR)*.o $(OBJ_DIR)*.ii $(OBJ_DIR)*.s *.save assembler cpu

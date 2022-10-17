@@ -1,7 +1,7 @@
-push 3
-push 1
-jb :end
-end:
-push 228
-out 
+push 24
+push 17
+sub
+push 35
+div
+out
 hlt
