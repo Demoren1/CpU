@@ -8,8 +8,6 @@
 #include "../include/debug.h"
 #include "../include/asm.h"
 
-extern FILE* ass_logs;
-
 void compile(FILE *executable_file, ass_info *info_of_codes)
 {
     size_t line = 0;
@@ -20,23 +18,25 @@ void compile(FILE *executable_file, ass_info *info_of_codes)
     char cmd[256] = {};
     assert(cmd != NULL);
 
+    #define DEF_CMD(name, num, arg, end_sym, ...)                                                               \
+            else if (strcmp(cmd, #name) == 0)                                                                   \
+            {                                                                                                   \
+                write_to_files(executable_file, info_of_codes->arr_of_commands, num, &ip, end_sym);            \
+                                                                                                                \
+                if(arg == 1)                                                                                    \
+                    get_args(info_of_codes, args_begin, info_of_codes->arr_of_commands, &ip, executable_file);  \
+            }
 
     while (line < info_of_codes->num_of_lines)
     {   
-        // DBG;
         sscanf(info_of_codes->text[line], "%s%n", cmd, &shift);
-        // DBG;
+        
         char* args_begin = info_of_codes->text[line] + shift + 1;
-        // DBG;
-        // printf("cmd = %s\n", cmd);
-        // printf("ip = %d\n", ip);
-        // printf("label num = %d , label sym = %c\n", label_ptr, label_sym);
 
         if (strchr(cmd, ':') != 0)
         {
 
             strncpy(label_name, find_label_name(cmd), 128);
-            // printf("func result = %s\n", label_name);
 
             if (strcmp(label_name, "ERROR") == 0)
             {
@@ -51,130 +51,7 @@ void compile(FILE *executable_file, ass_info *info_of_codes)
             label_ptr++;
         }
 
-        else if (strcmp("hlt", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, HLT_CMD, &ip, '\n');
-        }
-
-        else if (strcmp("show", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, SHOW_CMD, &ip, '\n');
-        }
-
-        else if (strcmp("push", cmd) == 0)
-        {   
-            write_to_files(executable_file, info_of_codes->arr_of_commands, PUSH_CMD, &ip, ' ');
-
-            get_args(info_of_codes, args_begin, info_of_codes->arr_of_commands, &ip, executable_file);  
-        }
-
-        else if (strcmp("pop", cmd) == 0)
-        {   
-            write_to_files(executable_file, info_of_codes->arr_of_commands, POP_CMD, &ip, ' ');
-
-            get_args(info_of_codes, args_begin, info_of_codes->arr_of_commands, &ip, executable_file);
-        }
-
-        else if (strcmp("add", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, ADD_CMD, &ip, '\n');
-        }
-
-        else if (strcmp("mul", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, MUL_CMD, &ip, '\n');
-        }
-
-        else if (strcmp("sub", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, SUB_CMD, &ip, '\n');
-        }
-
-        else if (strcmp("div", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, DIV_CMD, &ip, '\n');
-        }
-
-        else if (strcmp("out", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, OUT_CMD, &ip, '\n');
-        }
-
-        else if (strcmp("dump", cmd) == 0)
-        {   
-            write_to_files(executable_file, info_of_codes->arr_of_commands, DUMP_CMD, &ip, '\n');
-        }
-
-        else if (strcmp("in", cmd) == 0)
-        {   
-            write_to_files(executable_file, info_of_codes->arr_of_commands, IN_CMD, &ip, '\n');
-        }
-        
-        else if (strcmp("jmp", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, JMP_CMD, &ip, ' ');
-
-            get_args(info_of_codes, args_begin, info_of_codes->arr_of_commands, &ip, executable_file);
-        }
-
-        else if (strcmp("jae", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, JAE_CMD, &ip, ' ');
-
-            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
-        }
-
-        else if (strcmp("dup", cmd) == 0)
-        {   
-            write_to_files(executable_file, info_of_codes->arr_of_commands, DUP_CMD, &ip, '\n');
-        }
-        
-         else if (strcmp("ja", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, JA_CMD, &ip, ' ');
-
-            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
-        }
-        
-        else if (strcmp("jee", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, JEE_CMD, &ip, ' ');
-
-            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
-        }
-
-        else if (strcmp("jne", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, JNE_CMD, &ip, ' ');
-
-            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
-        }
-
-        else if (strcmp("jbe", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, JBE_CMD, &ip, ' ');
-
-            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
-        }
-        
-        else if (strcmp("jb", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, JB_CMD, &ip, ' ');
-
-            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
-        }
-
-        else if (strcmp("cal", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, CALL_CMD, &ip, ' ');
-
-            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
-        }
-
-        else if (strcmp("ret", cmd) == 0)
-        {
-            write_to_files(executable_file, info_of_codes->arr_of_commands, RET_CMD, &ip, '\n');
-        }
+        #include "../include/cmd.h"
 
         else if (cmd[0] == -1); 
 
@@ -187,6 +64,7 @@ void compile(FILE *executable_file, ass_info *info_of_codes)
         line++;   
     }
 }
+#undef DEF_CMD
 
 var_ass get_args(ass_info *info_of_codes, char *text, int *arr_of_commands, int *ip, FILE* executable_file)
 {   
@@ -234,9 +112,6 @@ var_ass get_args(ass_info *info_of_codes, char *text, int *arr_of_commands, int 
             
             sscanf(text, " :%s", label_name);
             label_ptr = find_address(label_name, info_of_codes);
-            // printf("label name = %s\n", label_name);
-            // printf("label ptr = %d\n", label_ptr);
-            // printf("addres from func = %d\n", info_of_codes->labels[label_ptr].address);
 
             if (info_of_codes->labels[label_ptr].address != -1)
                 write_to_files(executable_file, info_of_codes->arr_of_commands, info_of_codes->labels[label_ptr].address, ip, '\n');
@@ -263,7 +138,7 @@ size_t know_size_for_buff(FILE* text, const char * name_of_file)
     return data.st_size;
 }
 
-void fill_info_of_codes(ass_info *info_of_codes, FILE* file_ptr, const char* file_path)
+void fill_info_of_exec_file(ass_info *info_of_codes, FILE* file_ptr, const char* file_path)
 {   
     assert(info_of_codes != NULL);   //todo learn gdb
     assert(file_ptr != NULL);
@@ -292,29 +167,29 @@ void fill_info_of_codes(ass_info *info_of_codes, FILE* file_ptr, const char* fil
 
 int make_ptr_arr_of_lines(ass_info *info_of_codes)
 {
-    size_t counter = 1;
+    size_t str_counter = 1; 
     size_t curr_sym = 0;
     int flag = 1;
     
     for (; curr_sym < info_of_codes->num_of_sym; curr_sym++)
     {    
-        if (flag == 1 && (isalpha(info_of_codes->buffer[curr_sym]) || (isdigit(info_of_codes->buffer[curr_sym]))))
+        if (flag == 1 && isalnum(info_of_codes->buffer[curr_sym]))
         {
             info_of_codes->num_commands++;
             flag = 0;
         }
         
-        else if((curr_sym > 0) && ((isdigit(info_of_codes->buffer[curr_sym])) && info_of_codes->buffer[curr_sym] == ':')) //todo getline
+        else if((curr_sym > 0) && ((isdigit(info_of_codes->buffer[curr_sym])) && info_of_codes->buffer[curr_sym] == ':')) 
         {
             info_of_codes->num_commands--;
         }
         
-        else if (!(isalpha(info_of_codes->buffer[curr_sym]) || (isdigit(info_of_codes->buffer[curr_sym]))))
+        else if (!(isalnum(info_of_codes->buffer[curr_sym])))            
             flag = 1;
 
         if ((info_of_codes->buffer[curr_sym] == '\n'))
         {
-            counter++;
+            str_counter++;
 
             info_of_codes->buffer[curr_sym] = '\0';
         } 
@@ -328,8 +203,8 @@ int make_ptr_arr_of_lines(ass_info *info_of_codes)
             curr_sym -= 2;
         }
     }
-
-    info_of_codes->text = (char**) calloc(counter, sizeof(char*));
+    
+    info_of_codes->text = (char**) calloc(str_counter, sizeof(char*));
     assert(info_of_codes->text != NULL);
 
     size_t line = 1;
@@ -346,7 +221,7 @@ int make_ptr_arr_of_lines(ass_info *info_of_codes)
         }
     }
 
-    return counter;
+    return str_counter;
 }
 
 void detor_info(ass_info *info_of_codes)
@@ -359,9 +234,12 @@ void detor_info(ass_info *info_of_codes)
 void write_header_of_bin_file(FILE *exec_bin_file, const char* extension, int version, int num_of_commands)
 {
     int arr[3] = {};
-    arr[0] = extension[0] + extension[1] * 256 + extension[2] * 65536;
+    arr[0] += extension[0];
+    arr[0] += extension[1] << 8;
+    arr[0] += extension[2] << 16;
+
     arr[1] = version;
-    arr[2]   = num_of_commands;
+    arr[2] = num_of_commands;
     fwrite(arr, sizeof(int), 3, exec_bin_file);
 }
 
@@ -373,42 +251,6 @@ void fill_labels_bad_values(Labels_t *labels, int size)
     }
 }
 
-void dump_ass (ass_info *info_of_codes, int size, const char* file_name, const char* func_name, int line)
-{       
-    fprintf(ass_logs, "DUMP CALLED FROM %s file, %s func, %d line \n\n", file_name, func_name, line);
-
-    fprintf(ass_logs, "buff_size = %zd \n", info_of_codes->num_of_sym);           
-    fprintf(ass_logs, "num of str = %zd \n", info_of_codes->num_of_lines);        
-    fprintf(ass_logs, "num_of_commands = %zd\n", info_of_codes->num_commands);
-
-    fputs("\n\nDUMP BUFFER\n", ass_logs);
-    for (size_t i = 0; i < info_of_codes->num_of_sym; i++)
-    {           
-        if (info_of_codes->buffer[i] == '\0')
-        {
-            fprintf(ass_logs, "\n");
-            continue;
-        }
-        fprintf(ass_logs, "%c", info_of_codes->buffer[i]);                         
-    }
-
-    fputs("\n\nDUMP LINES\n", ass_logs);
-    for (size_t i = 0; i < info_of_codes->num_of_lines; i++)         
-        fprintf(ass_logs,"%s\n", info_of_codes->text[i]); 
-                                        
-    fputs("\n\nDUMP OF LABELS\n", ass_logs);
-    for(int i = 0; i < size; i++)
-    {
-        if (info_of_codes->labels[i].address != -1)
-        {
-            fprintf(ass_logs, "* %s = %2d   \n", info_of_codes->labels[i].label_name, info_of_codes->labels[i].address);
-        }
-        else if (info_of_codes->labels[i].address == -1)
-        {
-            fprintf(ass_logs, " %s = %2d (POISON)\n", info_of_codes->labels[i].label_name, info_of_codes->labels[i].address);
-        }
-    }
-}
 
 FILE* open_with_no_buff(const char* name_file, const char* regime)
 {
@@ -439,37 +281,15 @@ pair get_arg(char *str)
     if (isalpha(str[0]))
     {   
         
-        if (strcmp("rax", tmp_str) == 0)
-        {
-            tmp_pair.type |= ARG_REG;
-            tmp_pair.value = rax;
-        }
-
-        else if (strcmp("rbx", tmp_str) == 0)
-        {
-            tmp_pair.type |= ARG_REG;
-            tmp_pair.value = rbx;
-        }
-
-        else if (strcmp("rcx", tmp_str) == 0)
-        {
-            tmp_pair.type |= ARG_REG;
-            tmp_pair.value = rcx;
-        }
-
-        else if (strcmp("rdx", tmp_str) == 0)
-        {
-            tmp_pair.type |= ARG_REG;
-            tmp_pair.value = rdx;
-        }
+        WRITE_REG();
     }
 
     if (sscanf(str, "%d", &tmp_pair.value))
     {
         tmp_pair.type |= ARG_IMMED;
-    }
+    }   
 
-    if ((strchr(str, '[') != NULL) && (strchr(str, ']') != NULL) && (strchr(str, '[') < strchr(str, ']')))
+    if ((strchr(str, '[') != NULL) && (strchr(str, ']') != NULL) && (strchr(str, '[') < strchr(str, ']'))) // todo scanf"[ %d ]"
     {
         tmp_pair.type |= ARG_RAM;
         if (sscanf(strchr(str, '[') + 1, "%d", &tmp_value) == 1)
@@ -481,29 +301,7 @@ pair get_arg(char *str)
         {
             tmp_str[3] = '\0';
 
-            if (strcmp("rax", tmp_str) == 0)
-            {
-                tmp_pair.type |= ARG_REG;
-                tmp_pair.value = rax;
-            }
-
-            else if (strcmp("rbx", tmp_str) == 0)
-            {
-                tmp_pair.type |= ARG_REG;
-                tmp_pair.value = rbx;
-            }
-
-            else if (strcmp("rcx", tmp_str) == 0)
-            {
-                tmp_pair.type |= ARG_REG;
-                tmp_pair.value = rcx;
-            }
-
-            else if (strcmp("rdx", tmp_str) == 0)
-            {
-                tmp_pair.type |= ARG_REG;
-                tmp_pair.value = rdx;
-            }   
+            WRITE_REG();   
         }
     }
 

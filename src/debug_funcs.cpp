@@ -10,7 +10,7 @@ static FILE *log_file = 0;
 unsigned int stack_error(Stack *stk)                //todo check stk and syk->data departly
 {
     int stk_is_null = CHECK(!stk,                 STACK_ERROR_STK_WRONG_PTR);
-
+    
     if(!(stk_is_null & STACK_ERROR_STK_WRONG_PTR) && ((stk->code_of_error & STACK_ERROR_DOUBLE_CTOR) == 0)  && ((stk->code_of_error & STACK_ERROR_DOUBLE_DTOR) == 0))
     {
         stk->code_of_error |= CHECK(!stk->data,   STACK_ERROR_MEMNULL_BUFF); 
@@ -28,7 +28,7 @@ unsigned int stack_error(Stack *stk)                //todo check stk and syk->da
         stk->code_of_error |= CHECK(stk->l_canary != STRUCT_CANARY, STACK_ERROR_LEFT_CANARY_DIED);
         
         stk->code_of_error |= CHECK(stk->r_canary != STRUCT_CANARY, STACK_ERROR_RIGHT_CANARY_DIED);
-        )
+        )   
         if(!(stk->code_of_error & STACK_ERROR_MEMNULL_BUFF))
        {
             ON_CANARY_PROT
@@ -56,6 +56,7 @@ unsigned int stack_error(Stack *stk)                //todo check stk and syk->da
         stack_err_decoder(stk_is_null);
         abort();
     }
+
     return stk->code_of_error;
 }
 
@@ -96,12 +97,14 @@ void stack_err_decoder(unsigned int code_of_error)
     PRINT_ERROR(code_of_error, STACK_ERROR_WRONG_REALLOC);
 
     PRINT_ERROR(code_of_error, STACK_ERROR_VALUE_PTR_NULL);
+
 }
 
 void stack_dump(Stack *stk, const char* name_of_inner_func, const char* name_of_inner_file, int num_of_inner_str, unsigned int flag_of_error)
 {   
     if (!(stk->code_of_error & STACK_ERROR_MEMNULL_BUFF || stk->code_of_error & STACK_ERROR_STK_WRONG_PTR))
-    {
+    {   
+
         fprintf(log_file, "%s() at %s (%d):\n", name_of_inner_func, name_of_inner_file, num_of_inner_str);
         fprintf(LOG_FILE, "Stack[%p] (%s) \"%s\" at %s() at %s (%zd) \n", stk, (flag_of_error > 0) ? "ERROR" : "OK",
             stk->dump_info.name_of_variable, stk->dump_info.name_of_func, stk->dump_info.name_of_file, stk->dump_info.num_of_str);
@@ -133,7 +136,7 @@ void stack_dump(Stack *stk, const char* name_of_inner_func, const char* name_of_
     }
     else
     {
-        abort();
+        fprintf(LOG_FILE, "Dump cant write anything\n");
     } 
 
 }

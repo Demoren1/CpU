@@ -7,6 +7,7 @@
                                 stack_dump(stk, __FUNCTION__, __FILE__, __LINE__, stack_error(stk));        \
                                 return 0;                                                                   \
                             }                                                                               \
+    
 
 #define VAR_INFO(stack) __FUNCTION__, __FILE__, #stack, __LINE__ //todo stack.dump_info{__FUNCTION__, __FILE__, #stack, __LINE__} 
 

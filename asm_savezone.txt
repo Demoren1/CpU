@@ -1,0 +1,124 @@
+else if (strcmp("HLT", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, HLT_CMD, &ip, '\n');
+        }
+
+        else if (strcmp("SHOW", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, SHOW_CMD, &ip, '\n');
+        }
+
+        else if (strcmp("PUSH", cmd) == 0)
+        {   
+            write_to_files(executable_file, info_of_codes->arr_of_commands, PUSH_CMD, &ip, ' ');
+
+            get_args(info_of_codes, args_begin, info_of_codes->arr_of_commands, &ip, executable_file);  
+        }
+
+        else if (strcmp("POP", cmd) == 0)
+        {   
+            write_to_files(executable_file, info_of_codes->arr_of_commands, POP_CMD, &ip, ' ');
+
+            get_args(info_of_codes, args_begin, info_of_codes->arr_of_commands, &ip, executable_file);
+        }
+
+        else if (strcmp("ADD", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, ADD_CMD, &ip, '\n');
+        }
+
+        else if (strcmp("MUL", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, MUL_CMD, &ip, '\n');
+        }
+
+        else if (strcmp("SUB", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, SUB_CMD, &ip, '\n');
+        }
+
+        else if (strcmp("DIV", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, DIV_CMD, &ip, '\n');
+        }
+
+        else if (strcmp("OUT", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, OUT_CMD, &ip, '\n');
+        }
+
+        else if (strcmp("DUMP", cmd) == 0)
+        {   
+            write_to_files(executable_file, info_of_codes->arr_of_commands, DUMP_CMD, &ip, '\n');
+        }
+
+        else if (strcmp("IN", cmd) == 0)
+        {   
+            write_to_files(executable_file, info_of_codes->arr_of_commands, IN_CMD, &ip, '\n');
+        }
+        
+        else if (strcmp("JMP", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, JMP_CMD, &ip, ' ');
+
+            get_args(info_of_codes, args_begin, info_of_codes->arr_of_commands, &ip, executable_file);
+        }
+
+        else if (strcmp("JAE", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, JAE_CMD, &ip, ' ');
+
+            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
+        }
+
+        else if (strcmp("DUP", cmd) == 0)
+        {   
+            write_to_files(executable_file, info_of_codes->arr_of_commands, DUP_CMD, &ip, '\n');
+        }
+        
+         else if (strcmp("JA", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, JA_CMD, &ip, ' ');
+
+            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
+        }
+        
+        else if (strcmp("JEE", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, JEE_CMD, &ip, ' ');
+
+            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
+        }
+
+        else if (strcmp("JNE", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, JNE_CMD, &ip, ' ');
+
+            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
+        }
+
+        else if (strcmp("JBE", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, JBE_CMD, &ip, ' ');
+
+            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
+        }
+        
+        else if (strcmp("JB", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, JB_CMD, &ip, ' ');
+
+            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
+        }
+
+        else if (strcmp("CAL", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, CALL_CMD, &ip, ' ');
+
+            get_args(info_of_codes, args_begin,info_of_codes->arr_of_commands, &ip, executable_file);
+        }
+
+        else if (strcmp("RET", cmd) == 0)
+        {
+            write_to_files(executable_file, info_of_codes->arr_of_commands, RET_CMD, &ip, '\n');
+        }

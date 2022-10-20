@@ -1,0 +1,228 @@
+switch(cmd)
+        {
+
+        case PUSH_CMD:
+        {
+            if(full_cmd & ARG_IMMED) 
+                num += cpu->num_buffer[ip];            
+
+            if(full_cmd & ARG_REG)
+                num += cpu->registers[cpu->num_buffer[ip]];
+
+            if(full_cmd & ARG_RAM)   
+            {
+                num += cpu->RAM[cpu->num_buffer[ip]];
+            }
+
+            if((full_cmd & ARG_RAM) && (full_cmd & ARG_REG))
+            {
+                num += cpu->RAM[cpu->registers[cpu->num_buffer[ip]]];
+            }
+
+            ip++;
+            stack_push(stack, num);
+            break;
+        }
+
+        case POP_CMD:
+        {
+            stack_pop(stack, &num);
+
+            if(full_cmd & ARG_REG)   
+                cpu->registers[cpu->num_buffer[ip]] = (int) num;
+
+            if(full_cmd & ARG_RAM)   
+                cpu->RAM[cpu->num_buffer[ip]] = (int) num;
+            
+            if((full_cmd & ARG_RAM) && (full_cmd & ARG_REG))
+            {
+                cpu->RAM[cpu->registers[cpu->num_buffer[ip]]] = (int)num;
+            }
+
+            ip++;
+            break;
+        }
+
+        case ADD_CMD:
+        {            
+            stack_pop(stack, &num1);            
+            stack_pop(stack, &num2);
+
+            stack_push(stack, num1 + num2);
+            break;
+        }
+
+        case MUL_CMD:
+        {            
+            stack_pop(stack, &num1);            
+            stack_pop(stack, &num2);
+
+            stack_push(stack, num1 * num2 / ACCURACY);
+            break;
+        }
+
+        case SUB_CMD:
+        {            
+            stack_pop(stack, &num1);            
+            stack_pop(stack, &num2);
+
+            stack_push(stack, num2 - num1);
+            break;
+        }
+
+        case DIV_CMD:
+        {            
+            stack_pop(stack, &num1);            
+            stack_pop(stack, &num2);
+
+            int num = (int)(num1 * ACCURACY) / ((int) num2);
+            
+            stack_push(stack, (elem) num);
+            break;
+        }
+
+        case IN_CMD:
+        {            
+            scanf("%lf", &num);
+
+            num *= ACCURACY;
+            stack_push(stack, num);
+            break;
+        }
+
+        case OUT_CMD:
+        {           
+            stack_pop(stack, &num);
+            fprintf(file_result, "%d", (int)num);
+            fprintf(stdout, "%g \n", (num / ACCURACY));
+            break;
+
+        }
+
+        case DUMP_CMD:
+        {
+            DUMP_CPU(*cpu, ip, stack);
+            break;
+        }
+
+        case JMP_CMD:
+        {   
+            ip = (ssize_t)cpu->num_buffer[ip];            
+            break;
+        }
+
+        case JAE_CMD:
+        {               
+            stack_pop(stack, &num1);            
+            stack_pop(stack, &num2);
+            if (num1 >= num2)
+            {
+                ip = (ssize_t)cpu->num_buffer[ip];
+            }
+            else
+                ip++;
+            break;
+        }
+
+        case JA_CMD:
+        {               
+            stack_pop(stack, &num1);            
+            stack_pop(stack, &num2);
+            if (num1 > num2)
+            {
+                ip = (ssize_t)cpu->num_buffer[ip];
+            }
+            else
+                ip++;
+            break;
+        }
+
+        case JBE_CMD:
+        {               
+            stack_pop(stack, &num1);            
+            stack_pop(stack, &num2);
+            if (num1 <= num2)
+            {
+                ip = (ssize_t)cpu->num_buffer[ip];
+            }
+            else
+                ip++;
+            break;
+        }
+
+        case JB_CMD:
+        {   
+            stack_pop(stack, &num1);            
+            stack_pop(stack, &num2);
+            if (num1 < num2)
+            {
+                ip = (ssize_t)cpu->num_buffer[ip];
+            }
+            else
+                ip++;
+            break;
+        }
+
+        case JEE_CMD:
+        {   
+            stack_pop(stack, &num1);            
+            stack_pop(stack, &num2);
+            if (num1 == num2)
+            {
+                ip = (ssize_t)cpu->num_buffer[ip];
+            }        
+            else
+                ip++;    
+            break;
+        }
+
+        case JNE_CMD:
+        {               
+            stack_pop(stack, &num1);            
+            stack_pop(stack, &num2);
+            if (num1 != num2)
+            {
+                ip = (ssize_t)cpu->num_buffer[ip];
+            }
+            else
+                ip++;
+            break;
+        }
+
+        case CALL_CMD:
+        {   
+            stack_push(&(cpu->func_stack), (elem)ip);
+
+            ip = (ssize_t)cpu->num_buffer[ip];
+            break;
+        }
+
+        case RET_CMD:
+        {   
+            elem func_addres = 0;
+            stack_pop(&(cpu->func_stack), &func_addres);
+
+            ip = (ssize_t) func_addres;
+            ip++;
+            break;
+        }
+
+        case DUP_CMD:
+        {
+            stack_pop(stack, &num);
+            stack_push(stack, num);
+            stack_push(stack, num);
+
+            break;
+        }
+        case SHOW_CMD:
+        {
+            int counter = 0;
+            while ((cpu->RAM[counter] != '\0') && (counter < SIZE_OF_RAM))
+            {
+                printf("%c", cpu->RAM[counter]);
+                counter++;
+            }
+            break;
+        }
+        }

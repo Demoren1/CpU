@@ -1,4 +1,5 @@
 const int SIZE_OF_RAM = 4096;
+const int first_line_len = 64;
 
 struct Cpu_struct
 {
@@ -37,3 +38,7 @@ void fill_cpu_struct_bin (FILE *exec_file_bin, Cpu_struct *cpu, const char *path
 void find_num_of_commands(FILE *exec_file_bin, Cpu_struct *cpu);
 
 void dtor_exec_bin(Cpu_struct *cpu);
+
+void open_cpu_logs();
+
+void close_cpu_logs();

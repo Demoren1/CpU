@@ -14,11 +14,11 @@ CFLAGS= -save-temps -Wall  -fsanitize=address -g #-D _DEBUG -ggdb3 -std=c++20 -O
 -pie -Wlarger-than=8192 -Wstack-usage=8192
 
 #sources
-ASM_SRC := $(SRC_DIR)ass_funcs.cpp $(SRC_DIR)assembler.cpp 
-ASM_OBJ := $(patsubst $(SRC_DIR)%.cpp, $(OBJ_DIR)%.o, $(ASM_SRC))
+ASM_SRC := $(SRC_DIR)ass_funcs.cpp $(SRC_DIR)assembler.cpp $(SRC_DIR)asm_dump.cpp $(SRC_DIR)extension_const.cpp
+ASM_OBJ := $(patsubst $(SRC_DIR)%.cpp, $(OBJ_DIR)%.o, $(ASM_SRC)) 
 
 
-CPU_SRC := $(SRC_DIR)cpu_funcs.cpp $(SRC_DIR)cpu.cpp $(SRC_DIR)debug_funcs.cpp $(SRC_DIR)input_output.cpp $(SRC_DIR)stack_func.cpp
+CPU_SRC := $(SRC_DIR)cpu_funcs.cpp $(SRC_DIR)cpu.cpp $(SRC_DIR)debug_funcs.cpp $(SRC_DIR)input_output.cpp $(SRC_DIR)stack_func.cpp $(SRC_DIR)cpu_dump.cpp $(SRC_DIR)extension_const.cpp 
 CPU_OBJ := $(patsubst $(SRC_DIR)%.cpp, $(OBJ_DIR)%.o, $(CPU_SRC))
 
 #exe

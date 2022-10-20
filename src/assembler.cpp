@@ -8,10 +8,10 @@
 #include "../include/debug.h"
 #include "../include/asm.h"
 
-FILE* ass_logs = open_with_no_buff("ass_logs", "w");
-
 int main(int argc, char* argv[])
-{    
+{   
+    open_ass_logs();
+    
     const char* path_to_codes = name_of_input_file(argc, argv[1]);
     const char* path_to_executable_file = "executable_file.txt";
     const char* path_to_executable_file_bin = "executable_file.bin";
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 
     ass_info info_of_codes = {};
 
-    fill_info_of_codes(&info_of_codes, file_text, path_to_codes);
+    fill_info_of_exec_file(&info_of_codes, file_text, path_to_codes);  
 
     compile(executable_file, &info_of_codes);
    
@@ -44,7 +44,8 @@ int main(int argc, char* argv[])
     fclose(file_text);
     fclose(executable_file);
     fclose(executable_file_bin);
-    fclose(ass_logs);
+    close_ass_logs();
+
     return 0;
 }
 

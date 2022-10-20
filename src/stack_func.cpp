@@ -133,6 +133,8 @@ int stack_dtor(Stack *stk)
     
     stk->flag |= STACK_DESTROYED;
     ON_HASH_PROT(stack_rehash(stk));
+    
+    
     ASSERT_OK(stk);
     
     stack_poison_get(stk, 0, stk->capacity);
@@ -141,6 +143,7 @@ int stack_dtor(Stack *stk)
     
     free((char*) stk->data ON_CANARY_PROT(- sizeof(canary_t)));
     //todo destroy data ptr
+    
     return 0;
 }
 

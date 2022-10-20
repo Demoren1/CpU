@@ -9,10 +9,10 @@
 #include "../include/debug.h"
 #include "../include/cpu.h"
 
-FILE* cpu_logs = open_with_no_buff("cpu_logs.txt", "w");
-
 int main()
-{
+{   
+    open_cpu_logs();
+
     const char *path_to_executable_file = "executable_file.txt";
     const char *path_to_executable_file_bin = "executable_file.bin";
     const char *path_result_of_executable = "result_of_executable_file.txt";
@@ -27,18 +27,17 @@ int main()
     assert(exec_not_bin_file_ptr != NULL);
     assert(stk_out_file != NULL);
     assert(file_result != NULL);
-    assert(cpu_logs != NULL);
 
     do_not_bin_instructions(exec_not_bin_file_ptr, path_to_executable_file, file_result);
-
-    // do_bin_instructions(exec_bin_file_ptr, path_to_executable_file_bin, file_result);
+    
+    //do_bin_instructions(exec_bin_file_ptr, path_to_executable_file_bin, file_result);
     
     fclose(exec_not_bin_file_ptr);
-    fclose(cpu_logs);
     fclose(file_result);
     fclose(stk_out_file);
     fclose(exec_bin_file_ptr);
     fclose(file_result_bin);
-
+    close_cpu_logs();
+    
     return 1;
 }

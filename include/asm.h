@@ -1,26 +1,30 @@
 #ifndef ASM_GUARD
 #define ASM_GUARD
 #define VERSION 1
-#define EXTENSION "CP"
+extern const char *EXTENSION;
 
-#define WRITE_REG()     if (strcmp(str, "rax") == 0)                                                                    \
-                        {                                                                                               \
-                            write_to_files(executable_file, info_of_codes->arr_of_commands, rax, ip, '\n');             \
-                        }                                                                                               \
-                        else if (strcmp(str, "rbx") == 0)                                                               \
-                        {                                                                                               \
-                            write_to_files(executable_file, info_of_codes->arr_of_commands, rbx, ip, '\n');             \
-                        }                                                                                               \
-                        else if (strcmp(str, "rcx") == 0)                                                               \
-                        {                                                                                               \
-                            write_to_files(executable_file, info_of_codes->arr_of_commands, rcx, ip, '\n');             \
-                        }                                                                                               \
-                        else if (strcmp(str, "rdx") == 0)                                                               \
-                        {                                                                                               \
-                            write_to_files(executable_file, info_of_codes->arr_of_commands, rdx, ip, '\n');             \
+#define WRITE_REG()     if (strcmp("RAX", tmp_str) == 0)            \
+                        {                                           \
+                            tmp_pair.type |= ARG_REG;               \
+                            tmp_pair.value = RAX;                   \
+                        }                                           \
+                        else if (strcmp("RBX", tmp_str) == 0)       \
+                        {                                           \
+                            tmp_pair.type |= ARG_REG;               \
+                            tmp_pair.value = RBX;                   \
+                        }                                           \
+                        else if (strcmp("RCX", tmp_str) == 0)       \
+                        {                                           \
+                            tmp_pair.type |= ARG_REG;               \
+                            tmp_pair.value = RCX;                   \
+                        }                                           \
+                        else if (strcmp("RDX", tmp_str) == 0)       \
+                        {                                           \
+                            tmp_pair.type |= ARG_REG;               \
+                            tmp_pair.value = RDX;                   \
                         }
 
-const int ACCURACY = 100;
+const int ACCURACY = 1000;
 
 const int SIZE_OF_LABELS_ARR = 100;
 
@@ -55,7 +59,7 @@ const char *name_of_input_file(int num_of_str, const char* str);
 
 size_t know_size_for_buff(FILE* text, const char * name_of_file);
 
-void fill_info_of_codes(ass_info *info_of_codes, FILE* file_ptr, const char* file_path);
+void fill_info_of_exec_file(ass_info *info_of_codes, FILE* file_ptr, const char* file_path);
 
 const char *find_label_name(char *str);
 
@@ -75,46 +79,35 @@ void dump_ass (ass_info *info_of_codes, int size, const char* file_name, const c
 
 FILE* open_with_no_buff(const char* name_file, const char* regime);
 
-void write_to_files(FILE* executable_file, int *arr_of_cmd, int target_num, int *cmd_counter, char end_char);
+void write_to_files(FILE* executable_file, int *arr_of_cmd, int target_num, int *cmd_counter, const char end_char);
 
 var_ass get_args(ass_info *info_of_codes, char *text, int *arr_of_commands, int *ip, FILE* executable_file);
 
 void start_to_point_on_first_line(FILE *executable_file);
 
+void open_ass_logs();
+
+void close_ass_logs();
+
 const int MASK_CMD = 0x3F;
+
+#define DEF_CMD(name, num, arg, end_sym, ...)    \
+    name ## _CMD = num,                
 
 enum CPU_codes
 {   
-    DUMP_CMD = -1,
-    HLT_CMD  = 0,
-    PUSH_CMD = 1,
-    POP_CMD  = 2,
-    ADD_CMD  = 3,
-    SUB_CMD  = 4,
-    MUL_CMD  = 5,
-    DIV_CMD  = 6,
-    IN_CMD   = 7,
-    DUP_CMD  = 8,
-    JMP_CMD  = 9,
-    JA_CMD   = 10,
-    JAE_CMD  = 11,
-    JEE_CMD  = 12,
-    JBE_CMD  = 13,
-    JB_CMD   = 14,
-    JNE_CMD  = 15,
-    CALL_CMD = 16,
-    RET_CMD  = 17,
-    SHOW_CMD = 18,
-    OUT_CMD  = 31,
+    #include "../include/cmd.h"
+    MAX_CMD
 };
+#undef DEF_CMD
 
 enum Registers
 {   
-    rax = 1,
-    rbx = 2,
-    rcx = 3,
-    rdx = 4,
-    rex = ACCURACY,
+    RAX = 1,
+    RBX = 2,
+    RCX = 3,
+    RDX = 4,
+    REX = ACCURACY,
 };
 
 enum Masks
@@ -125,3 +118,29 @@ enum Masks
 };
 
 #endif
+
+
+
+/*
+DUMP_CMD = -1,
+HLT_CMD  = 0,
+PUSH_CMD = 1,
+POP_CMD  = 2,
+ADD_CMD  = 3,
+SUB_CMD  = 4,
+MUL_CMD  = 5,
+DIV_CMD  = 6,
+IN_CMD   = 7,
+DUP_CMD  = 8,
+JMP_CMD  = 9,
+JA_CMD   = 10,
+JAE_CMD  = 11,
+JEE_CMD  = 12,
+JBE_CMD  = 13,
+JB_CMD   = 14,
+JNE_CMD  = 15,
+CALL_CMD = 16,
+RET_CMD  = 17,
+SHOW_CMD = 18,
+OUT_CMD  = 31,
+*/

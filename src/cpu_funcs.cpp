@@ -10,8 +10,6 @@
 #include "../include/debug.h"
 #include "../include/cpu.h"
 
-extern FILE* cpu_logs;
-
 void check_executable_file(FILE *exec_file_ptr, Cpu_struct *cpu)
 {
     char extension[128] = {};
@@ -110,65 +108,9 @@ void do_not_bin_instructions(FILE* exec_not_bin_file_ptr, const char* path_to_ex
 
     dtor_exec_no_bin(&cpu);
     
-    close_logs();
     stack_dtor(&cpu.stack);
     stack_dtor(&cpu.func_stack);
-}
-
-void dump_cpu(Cpu_struct *cpu, ssize_t ip, Stack *stk, const char* file_name, const char* func_name, int num_of_line)
-{
-    fprintf(cpu_logs, "\n\nDump was called from %s file, %s function, %d\n", file_name, func_name, num_of_line);
-    
-    fputs("\nDUMP OF NUM_BUFFER\n", cpu_logs);                               
-    for (ssize_t i = 0; i < cpu->num_of_commands; i++)               
-    {   if (i < ip)                                               
-            fprintf(cpu_logs, "         * [%3zd] = %2d\n", i, cpu->num_buffer[i]);
-
-        else if (i > ip)                                               
-            fprintf(cpu_logs, "           [%3zd] = %2d\n", i, cpu->num_buffer[i]); 
-
-        else if (i == ip)
-            fprintf(cpu_logs, "  ip = %zd >>[%3zd] = %2d\n", ip,  i, cpu->num_buffer[i]); 
-    }                                                                      
-
-    fputs("\nDUMP OF REGISTERS\n", cpu_logs);
-    for (int i = 1; i < 5; i++)
-    {
-        fprintf(cpu_logs, "r%cx = %d\n", 'a' + i - 1, cpu->registers[i]);
-    }
-
-    // fputs("\nDUMP OF BUFFER\n", cpu_logs);                                    
-    // for (ssize_t i = 0; i < cpu->size; i++)                            
-    // {                                                                        
-    //     fprintf(cpu_logs, "* [%3zd] = %2c (decimal %d)\n", i, cpu->buffer[i], cpu->buffer[i]);       
-    // }
-
-    fputs("\nDUMP OF STACK\n", cpu_logs);
-    for (int i = 0; i < stk->capacity; i++)
-    {
-        if (isnan(stk->data[i])) 
-            fprintf(cpu_logs,"   [%d] = %s\n", i, "NAN(POISON)");
-        else 
-            fprintf(cpu_logs," * [%d] = %g\n", i, stk->data[i]);
-    }
-    
-    // printf("capacity %d\n", cpu->func_stack.capacity);
-    
-    fputs("\nDUMP OF FUNC STACK\n", cpu_logs);
-    for (int i = 0; i < cpu->func_stack.capacity; i++)
-    {
-        if (isnan(cpu->func_stack.data[i])) 
-            fprintf(cpu_logs,"   [%d] = %s\n", i, "NAN(POISON)");
-        else 
-            fprintf(cpu_logs," * [%d] = %g\n", i, cpu->func_stack.data[i]);
-    }
-
-    fputs("\nDUMP OF RAM\n", cpu_logs);
-    for (int i = 0; i < SIZE_OF_RAM; i++)
-    {
-        if (cpu->RAM[i] != 0)
-            fprintf(cpu_logs, "[%3d] = %3d\n", i, cpu->RAM[i]);
-    }
+    close_logs();
 }
 
 void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
@@ -179,263 +121,35 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
 
     DUMP_CPU(*cpu, ip, stack); 
 
+#define DEF_CMD(name, num, arg, end_sym, ...)                                       \
+        case num:                                                                   \
+            __VA_ARGS__                                                            \
+            break;                                                                  \
 
     while (ip < cpu->num_of_commands)
-    {   
+    {   elem num1 = 0, num2 = 0, num = 0;
         cmd = cpu->num_buffer[ip++];
         full_cmd = cmd;
         (cmd != DUMP_CMD) && (cmd = cmd & MASK_CMD);
 
-        printf("cmd = %0x (%d)\n", cmd, cmd);
+        // printf("cmd = %0x (%d)\n", cmd, cmd);
         // printf("full_cmd = %0x(%d) \n", full_cmd, full_cmd);
 
         // sleep(1);
-
+        
         if (cmd == HLT_CMD)
         {
             break;            
         }
-
-        else if (cmd == PUSH_CMD)
+        switch (cmd)
         {
-            elem num = 0;
-            // printf("immed test %d\n", full_cmd & ARG_IMMED);
-            // printf("reg test %d\n", full_cmd & ARG_REG);
-
-            if(full_cmd & ARG_IMMED) 
-                num += cpu->num_buffer[ip];            
-
-            if(full_cmd & ARG_REG)
-                num += cpu->registers[cpu->num_buffer[ip]];
-
-            if(full_cmd & ARG_RAM)   
-            {
-                num += cpu->RAM[cpu->num_buffer[ip]];
-            }
-
-            if((full_cmd & ARG_RAM) && (full_cmd & ARG_REG))
-            {
-                num += cpu->RAM[cpu->registers[cpu->num_buffer[ip]]];
-            }
-
-            ip++;
-            stack_push(stack, num);
+            #include "../include/cmd.h"
         }
-
-        else if (cmd == POP_CMD)
-        {
-            elem num = 0;
-            stack_pop(stack, &num);
-
-            // printf("immed test %d\n", full_cmd & ARG_IMMED);
-            // printf("reg test %d\n", full_cmd & ARG_REG);
-            // printf("mem test %d\n", full_cmd & ARG_RAM);
-            // printf("num  = %d\n", (int) num);
-
-            if(full_cmd & ARG_REG)   
-                cpu->registers[cpu->num_buffer[ip]] = (int) num;
-
-            if(full_cmd & ARG_RAM)   
-                cpu->RAM[cpu->num_buffer[ip]] = (int) num;
-            
-            if((full_cmd & ARG_RAM) && (full_cmd & ARG_REG))
-            {
-                cpu->RAM[cpu->registers[cpu->num_buffer[ip]]] = (int)num;
-            }
-
-            ip++;
-        }
-
-        else if (cmd == ADD_CMD)
-        {
-            double num1 = 0, num2 =0;
-            
-            stack_pop(stack, &num1);            
-            stack_pop(stack, &num2);
-
-            stack_push(stack, num1 + num2);
-        }
-
-        else if (cmd == MUL_CMD)
-        {
-            double num1 = 0, num2 =0;
-            
-            stack_pop(stack, &num1);            
-            stack_pop(stack, &num2);
-
-            stack_push(stack, num1 * num2 / ACCURACY);
-        }
-
-        else if (cmd == SUB_CMD)
-        {
-            double num1 = 0, num2 =0;
-            
-            stack_pop(stack, &num1);            
-            stack_pop(stack, &num2);
-
-            stack_push(stack, num2 - num1);
-        }
-
-        else if (cmd == DIV_CMD)
-        {
-            elem num1 = 0, num2 =0;
-            
-            stack_pop(stack, &num1);            
-            stack_pop(stack, &num2);
-
-            int num = (int)(num1 * ACCURACY) / ((int) num2);
-            
-            stack_push(stack, (elem) num);
-        }
-
-        else if (cmd == IN_CMD)
-        {
-            double in_num = 0;
-            
-            scanf("%lf", &in_num);
-
-            in_num *= ACCURACY;
-            stack_push(stack, in_num);
-        }
-
-        else if (cmd == OUT_CMD)
-        {   
-            double num = 0;
-            stack_pop(stack, &num);
-            fprintf(file_result, "%d", (int)num);
-            fprintf(stdout, "%g \n", (num / ACCURACY));
-
-        }
-
-        else if(cmd == DUMP_CMD)
-        {
-            DUMP_CPU(*cpu, ip, stack);
-        }
-
-        else if(cmd == JMP_CMD)
-        {   
-            ip = (ssize_t)cpu->num_buffer[ip];            
-        }
-
-        else if(cmd == JAE_CMD)
-        {   
-            double num1 = 0, num2 =0;
-            
-            stack_pop(stack, &num1);            
-            stack_pop(stack, &num2);
-            if (num1 >= num2)
-            {
-                ip = (ssize_t)cpu->num_buffer[ip];
-            }
-            else
-                ip++;
-        }
-
-        else if(cmd == JA_CMD)
-        {   
-            double num1 = 0, num2 =0;
-            
-            stack_pop(stack, &num1);            
-            stack_pop(stack, &num2);
-            if (num1 > num2)
-            {
-                ip = (ssize_t)cpu->num_buffer[ip];
-            }
-            else
-                ip++;
-        }
-
-        else if(cmd == JBE_CMD)
-        {   
-            double num1 = 0, num2 =0;
-            
-            stack_pop(stack, &num1);            
-            stack_pop(stack, &num2);
-            if (num1 <= num2)
-            {
-                ip = (ssize_t)cpu->num_buffer[ip];
-            }
-            else
-                ip++;
-        }
-
-        else if(cmd == JB_CMD)
-        {   
-            double num1 = 0, num2 =0;
-            
-            stack_pop(stack, &num1);            
-            stack_pop(stack, &num2);
-            if (num1 < num2)
-            {
-                ip = (ssize_t)cpu->num_buffer[ip];
-            }
-            else
-                ip++;
-        }
-
-        else if(cmd == JEE_CMD)
-        {   
-            double num1 = 0, num2 =0;
-            
-            stack_pop(stack, &num1);            
-            stack_pop(stack, &num2);
-            if (num1 == num2)
-            {
-                ip = (ssize_t)cpu->num_buffer[ip];
-            }        
-            else
-                ip++;    
-        }
-
-        else if(cmd == JNE_CMD)
-        {   
-            double num1 = 0, num2 =0;
-            
-            stack_pop(stack, &num1);            
-            stack_pop(stack, &num2);
-            if (num1 != num2)
-            {
-                ip = (ssize_t)cpu->num_buffer[ip];
-            }
-            else
-                ip++;
-        }
-
-        else if(cmd == CALL_CMD)
-        {   
-            stack_push(&(cpu->func_stack), (elem)ip);
-
-            ip = (ssize_t)cpu->num_buffer[ip];
-        }
-
-        else if(cmd == RET_CMD)
-        {   
-            elem func_addres = 0;
-            stack_pop(&(cpu->func_stack), &func_addres);
-
-            ip = (ssize_t) func_addres;
-            ip++;
-        }
-
-        else if(cmd == DUP_CMD)
-        {
-            double num = 0;
-
-            stack_pop(stack, &num);
-            stack_push(stack, num);
-            stack_push(stack, num);
-        }
-        else if(cmd == SHOW_CMD)
-        {
-            int counter = 0;
-            while ((cpu->RAM[counter] != '\0') && (counter < SIZE_OF_RAM))
-            {
-                printf("%c", cpu->RAM[counter]);
-                counter++;
-            }
-        }
+        DUMP_CPU(*cpu, ip, &cpu->stack);
     }
 }
+#undef DEF_CMD
+
 
 void do_bin_instructions(FILE* exec_bin_file_ptr, const char* path_to_executable_file_bin, FILE* file_result)
 {   
@@ -443,31 +157,35 @@ void do_bin_instructions(FILE* exec_bin_file_ptr, const char* path_to_executable
     assert(path_to_executable_file_bin != NULL);
     assert(file_result != NULL);
 
+    struct Cpu_struct cpu ={};  
 
     Stack stack ={};
     open_logs();
-    STACK_CTOR(stack, 10);
 
-    struct Cpu_struct cpu ={};
+    STACK_CTOR(cpu.stack, 10);
+    
+    STACK_CTOR(cpu.func_stack, 5);
     
     check_executable_bin_file(exec_bin_file_ptr, &cpu);
 
     fill_cpu_struct_bin(exec_bin_file_ptr, &cpu, path_to_executable_file_bin);
-
-    execute_commands(&cpu, &stack, file_result);
-
-    dtor_exec_bin(&cpu);
-    close_logs();
+    
+    execute_commands(&cpu, &cpu.stack, file_result);
+    
+    dtor_exec_no_bin(&cpu);
+    
     stack_dtor(&cpu.stack);
+    stack_dtor(&cpu.func_stack);
+    close_logs();
 }
 
 void check_executable_bin_file(FILE *exec_file_bin, Cpu_struct *cpu)
 {
-    int first_line[64] = {};
+    int first_line[first_line_len] = {};   
     
     fread(first_line, sizeof(int), 2, exec_file_bin);
     
-    assert(first_line[0] == 'C' + 'P' * 256);
+    assert(first_line[0] == EXTENSION[0] + EXTENSION[1] * 256);
     assert(first_line[1] == VERSION);
 }
 
@@ -488,7 +206,7 @@ void fill_cpu_struct_bin (FILE *exec_file_bin, Cpu_struct *cpu, const char *path
 
 void find_num_of_commands(FILE *exec_file_bin, Cpu_struct *cpu)
 {
-    int first_line[64] = {};
+    int first_line[first_line_len] = {};
     assert(first_line != NULL);
     
     int test_fread = 0;

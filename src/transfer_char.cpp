@@ -8,17 +8,18 @@ int main()
     fgets(str, 256, stdin);
     
     int len = strlen(str);
-    printf("push 0      ##%s", str);
+    printf("PUSH 0      ##%s", str);
 
     for (int i = len - 1; i >= 0; i--)
     {
-        printf("push %d\n", str[i]);
+        printf("PUSH %d\n", str[i]);
     }
 
     for (int i = 0; i < len + 1; i++)
     {
-        printf("pop [%d]\n", i);
+        printf("POP [%d]\n", i);
     }
+    printf("SHOW\n");
 
     return 0;
 }

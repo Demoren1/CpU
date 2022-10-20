@@ -1,7 +1,11 @@
-push 24
-push 17
-sub
-push 35
-div
-out
-hlt
+PUSH 6
+PUSH 5
+JA :NICE
+PUSH 2
+OUT
+
+
+NICE:
+PUSH 1
+OUT
+HLT
