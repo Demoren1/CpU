@@ -1,5 +1,5 @@
-const int SIZE_OF_RAM = 4096;
-const int first_line_len = 64;
+const int SIZE_OF_RAM    = 4096;
+const int FIRST_LINE_LEN = 64;
 
 struct Cpu_struct
 {
@@ -17,25 +17,25 @@ struct Cpu_struct
 
 void execute_commands(Cpu_struct *cpu, Stack *stack, FILE *file_result);
 
-void check_executable_file(FILE *codes_file_ptr, Cpu_struct *cpu_codes);
+int check_executable_file(FILE *codes_file_ptr, Cpu_struct *cpu_codes);
 
-void fill_cpu_struct(FILE *exec_file, Cpu_struct *cpu, const char *path_to_file);
+int fill_cpu_struct(FILE *exec_file, Cpu_struct *cpu, const char *path_to_file);
 
 void dtor_exec_no_bin(Cpu_struct *cpu);
 
 void make_num_buffer(Cpu_struct *cpu);
 
-void do_not_bin_instructions(FILE* exec_not_bin_file_ptr, const char* path_to_executable_file, FILE* file_result);
+int do_not_bin_instructions(FILE* exec_not_bin_file_ptr, const char* path_to_executable_file, FILE* file_result);
 
 void dump_cpu(Cpu_struct *cpu, ssize_t ip, Stack *stk, const char* file_name, const char* func_name, int num_of_line);
 
-void do_bin_instructions(FILE* exec_bin_file_ptr, const char* path_to_executable_file_bin, FILE* file_result);
+int do_bin_instructions(FILE* exec_bin_file_ptr, const char* path_to_executable_file_bin, FILE* file_result);
 
-void check_executable_bin_file(FILE *codes_file_ptr, Cpu_struct *cpu_codes);
+int check_executable_bin_file(FILE *codes_file_ptr, Cpu_struct *cpu_codes);
 
-void fill_cpu_struct_bin (FILE *exec_file_bin, Cpu_struct *cpu, const char *path_to_bin_file);
+int fill_cpu_struct_bin (FILE *exec_file_bin, Cpu_struct *cpu, const char *path_to_bin_file);
 
-void find_num_of_commands(FILE *exec_file_bin, Cpu_struct *cpu);
+int find_num_of_commands(FILE *exec_file_bin, Cpu_struct *cpu, const char* name_of_file);
 
 void dtor_exec_bin(Cpu_struct *cpu);
 

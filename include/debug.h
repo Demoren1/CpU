@@ -32,10 +32,20 @@ void close_logs();
 
 #define ASSERTED() stack_print_in_logs(__LINE__, __FUNCTION__, __FILE__);
 
+#define CHECK_FUNC(func)    if(func == -1)                              \
+                            {                                           \
+                                printf("Something go wrong in func ");  \
+                                DBG;                                    \
+                                return -1;                              \
+                            }
 
+#define CHECK_CONDITION(condition)  if(!condition)                           \
+                                    {                                        \
+                                        printf("Something go wrong on");     \
+                                        DBG;                                 \
+                                        return -1;                           \
+                                    }  
                  
-
-
 enum errors 
 {
     STACK_ERROR_MEMNULL_BUFF          = 1 << 0,

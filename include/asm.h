@@ -3,26 +3,7 @@
 #define VERSION 1
 extern const char *EXTENSION;
 
-#define WRITE_REG()     if (strcmp("RAX", tmp_str) == 0)            \
-                        {                                           \
-                            tmp_pair.type |= ARG_REG;               \
-                            tmp_pair.value = RAX;                   \
-                        }                                           \
-                        else if (strcmp("RBX", tmp_str) == 0)       \
-                        {                                           \
-                            tmp_pair.type |= ARG_REG;               \
-                            tmp_pair.value = RBX;                   \
-                        }                                           \
-                        else if (strcmp("RCX", tmp_str) == 0)       \
-                        {                                           \
-                            tmp_pair.type |= ARG_REG;               \
-                            tmp_pair.value = RCX;                   \
-                        }                                           \
-                        else if (strcmp("RDX", tmp_str) == 0)       \
-                        {                                           \
-                            tmp_pair.type |= ARG_REG;               \
-                            tmp_pair.value = RDX;                   \
-                        }
+#define POISON -1
 
 const int ACCURACY = 1000;
 
@@ -47,7 +28,7 @@ struct ass_info
 
 struct pair
 {
-    int type; // create enum: REG, MUNBER, etc ...
+    int type; 
     int value;
 };
 
@@ -59,7 +40,7 @@ const char *name_of_input_file(int num_of_str, const char* str);
 
 size_t know_size_for_buff(FILE* text, const char * name_of_file);
 
-void fill_info_of_exec_file(ass_info *info_of_codes, FILE* file_ptr, const char* file_path);
+int fill_info_of_exec_file(ass_info *info_of_codes, FILE* file_ptr, const char* file_path);
 
 const char *find_label_name(char *str);
 
@@ -69,7 +50,7 @@ int make_ptr_arr_of_lines(ass_info *info_of_codes);
 
 void detor_info(ass_info *info_of_codes);
 
-void compile(FILE *executable_file, ass_info *info_of_codes);
+int compile(FILE *executable_file, ass_info *info_of_codes);
 
 void write_header_of_bin_file(FILE *exec_bin_file, const char* extension, int version, int num_of_commands);
 
@@ -91,7 +72,7 @@ void close_ass_logs();
 
 const int MASK_CMD = 0x3F;
 
-#define DEF_CMD(name, num, arg, end_sym, ...)    \
+#define DEF_CMD(name, num, arg, end_sym, getarg_code,...)    \
     name ## _CMD = num,                
 
 enum CPU_codes
@@ -106,8 +87,7 @@ enum Registers
     RAX = 1,
     RBX = 2,
     RCX = 3,
-    RDX = 4,
-    REX = ACCURACY,
+    RDX = 4
 };
 
 enum Masks
@@ -118,29 +98,3 @@ enum Masks
 };
 
 #endif
-
-
-
-/*
-DUMP_CMD = -1,
-HLT_CMD  = 0,
-PUSH_CMD = 1,
-POP_CMD  = 2,
-ADD_CMD  = 3,
-SUB_CMD  = 4,
-MUL_CMD  = 5,
-DIV_CMD  = 6,
-IN_CMD   = 7,
-DUP_CMD  = 8,
-JMP_CMD  = 9,
-JA_CMD   = 10,
-JAE_CMD  = 11,
-JEE_CMD  = 12,
-JBE_CMD  = 13,
-JB_CMD   = 14,
-JNE_CMD  = 15,
-CALL_CMD = 16,
-RET_CMD  = 17,
-SHOW_CMD = 18,
-OUT_CMD  = 31,
-*/

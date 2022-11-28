@@ -6,15 +6,34 @@
                                     ip = cell_value;                \
                                 else                                \
                                     ip++;                           
+#define JMP_GETARG  {                                                                                                                                   \
+                        int label_ptr = 0;                                                                                                              \
+                        char label_name[128] = {};                                                                                                      \
+                        sscanf(text, " :%s", label_name);                                                                                               \
+                        label_ptr = find_address(label_name, info_of_codes);                                                                            \
+                        if (info_of_codes->labels[label_ptr].address != -1)                                                                             \
+                            write_to_files(executable_file, info_of_codes->arr_of_commands, info_of_codes->labels[label_ptr].address, ip, '\n');        \
+                        break;                                                                                                                          \
+                    }                                                                                                                               
 
-
-DEF_CMD(HLT, 0, 0, '\n', 
+DEF_CMD(HLT, 0, 0, '\n',
+{}, 
 {
     break;
 }
 )
 
 DEF_CMD (PUSH, 1, 1, ' ',
+{
+    arr_of_commands[*ip-1] |= args.type;
+            fseek(executable_file, -2, SEEK_CUR);
+            fprintf(executable_file, "%d%c", arr_of_commands[*ip-1],' ');
+                        
+            arr_of_commands[*ip] = args.value;
+            fprintf(executable_file, "%d %c", arr_of_commands[(*ip)++],'\n');
+            
+            break;
+},
 {
     if(full_cmd & ARG_IMMED) 
         num += cell_value;            
@@ -38,6 +57,15 @@ DEF_CMD (PUSH, 1, 1, ' ',
 )
 
 DEF_CMD(POP, 2, 1, ' ',
+{arr_of_commands[*ip-1] |= args.type;
+            fseek(executable_file, -2, SEEK_CUR);
+            fprintf(executable_file, "%d%c", arr_of_commands[*ip-1],' ');
+                        
+            arr_of_commands[*ip] = args.value;
+            fprintf(executable_file, "%d %c", arr_of_commands[(*ip)++],'\n');
+            
+            break;
+},
 {
     pop(num);
 
@@ -57,6 +85,7 @@ DEF_CMD(POP, 2, 1, ' ',
 )
 
 DEF_CMD(ADD, 3, 0, '\n',
+{},
 {   
     pop(num1);           
     pop(num2);
@@ -66,6 +95,7 @@ DEF_CMD(ADD, 3, 0, '\n',
 )
 
 DEF_CMD(SUB, 4, 0, '\n',
+{},
 {   
     pop(num1);           
     pop(num2);
@@ -75,6 +105,7 @@ DEF_CMD(SUB, 4, 0, '\n',
 )
 
 DEF_CMD(MUL, 5, 0, '\n',
+{},
 {    
     pop(num1);           
     pop(num2);
@@ -85,6 +116,7 @@ DEF_CMD(MUL, 5, 0, '\n',
 
 
 DEF_CMD(DIV, 6, 0, '\n',
+{},
 {
     pop(num1);           
     pop(num2);
@@ -96,6 +128,7 @@ DEF_CMD(DIV, 6, 0, '\n',
 )
 
 DEF_CMD(IN, 7, 0, '\n',
+{},
 {
     scanf("%lf", &num);
 
@@ -104,6 +137,7 @@ DEF_CMD(IN, 7, 0, '\n',
 )
 
 DEF_CMD(OUT, 31, 0, '\n',
+{},
 {
     pop(num);
     
@@ -113,12 +147,14 @@ DEF_CMD(OUT, 31, 0, '\n',
 )
 
 DEF_CMD(DUMP, -1, 0, '\n',
+{},
 {
     DUMP_CPU(*cpu, ip, stack);
 }
 )
 
 DEF_CMD(DUP, 8, 0, '\n',
+{},
 {
     pop(num);
     push(num);
@@ -127,12 +163,14 @@ DEF_CMD(DUP, 8, 0, '\n',
 )
 
 DEF_CMD(JMP, 9, 1, ' ',
+{JMP_GETARG},
 {
     ip = cell_value;            
 }
 )
 
 DEF_CMD(JA, 10, 1, ' ',
+{JMP_GETARG},
 {
     pop(num1);
     pop(num2);
@@ -141,6 +179,7 @@ DEF_CMD(JA, 10, 1, ' ',
 )
 
 DEF_CMD(JAE, 11, 1, ' ', 
+{JMP_GETARG},
 {               
     pop(num1);
     pop(num2);
@@ -150,6 +189,7 @@ DEF_CMD(JAE, 11, 1, ' ',
 )
 
 DEF_CMD(JEE, 12, 1, ' ',
+{JMP_GETARG},
 {
     pop(num1);
     pop(num2);
@@ -158,6 +198,7 @@ DEF_CMD(JEE, 12, 1, ' ',
 )
 
 DEF_CMD(JBE, 13, 1, ' ',
+{JMP_GETARG},
 {
     pop(num1);
     pop(num2);
@@ -166,6 +207,7 @@ DEF_CMD(JBE, 13, 1, ' ',
 )
 
 DEF_CMD(JB, 14, 1, ' ',
+{JMP_GETARG},
 {
     pop(num1);
     pop(num2);
@@ -174,6 +216,7 @@ DEF_CMD(JB, 14, 1, ' ',
 )
 
 DEF_CMD(JNE, 15, 1, ' ',
+{JMP_GETARG},
 {
     pop(num1);
     pop(num2);
@@ -182,6 +225,7 @@ DEF_CMD(JNE, 15, 1, ' ',
 )
 
 DEF_CMD(CALL, 16, 1, ' ',
+{JMP_GETARG},
 {
     stack_push(&(cpu->func_stack), (elem)ip);
 
@@ -190,6 +234,7 @@ DEF_CMD(CALL, 16, 1, ' ',
 )
 
 DEF_CMD(RET, 17, 1, '\n',
+{JMP_GETARG},
 {
     elem func_addres = 0;
     stack_pop(&(cpu->func_stack), &func_addres);
@@ -200,6 +245,7 @@ DEF_CMD(RET, 17, 1, '\n',
 )
 
 DEF_CMD(SHOW, 18, 0, '\n',
+{},
 {
     int counter = 0;
     while ((cpu->RAM[counter] != '\0') && (counter < SIZE_OF_RAM))
@@ -211,6 +257,7 @@ DEF_CMD(SHOW, 18, 0, '\n',
 )
 
 DEF_CMD(OUTF, 19, 0, '\n',
+{},
 {   
     pop(num);
     
@@ -220,6 +267,7 @@ DEF_CMD(OUTF, 19, 0, '\n',
 )
 
 DEF_CMD(SQRT, 20, 0, '\n',
+{},
 {
     var sqrtt = 0;
     var pitch = 1 / ((var)ACCURACY);
@@ -242,13 +290,41 @@ DEF_CMD(SQRT, 20, 0, '\n',
 )
 
 DEF_CMD(DBG, 21, 1, '\n',
+{},
 {
     printf("ip = %zd\n", ip);
 }
 )
 
+DEF_CMD(SIN, 22, 0, '\n',
+{},
+{
+    pop(num);
+    num = num / ACCURACY;
+    num = sin(num);
+    push(num * ACCURACY);
+})
 
+DEF_CMD(COS, 23, 0, '\n',
+{},
+{
+    pop(num);
+    num = num / ACCURACY;
+    num = cos(num);
+    push(num * ACCURACY);
+})
 
+DEF_CMD(INCR_R, 24, 1, '\n',
+{           
+    arr_of_commands[*ip] = args.value;
+    fprintf(executable_file, "%d %c", arr_of_commands[(*ip)++],'\n');
+},
+{
+    int tmp = cpu->registers[cell_value];
+    tmp += ACCURACY;
+    cpu->registers[cell_value] = tmp;
+    ip++;
+})
 
 
 

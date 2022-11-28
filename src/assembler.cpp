@@ -5,24 +5,27 @@
 #include <sys/stat.h>
 #include <math.h>
 #include <ctype.h>
-#include "../include/debug.h"
-#include "../include/asm.h"
+#include <debug.h> 
+#include <asm.h>
 
-int main(int argc, char* argv[])
+// ./asm filename
+// ./asm filename -o file.bin
+// ./asm -o file.bin filename
+// After releasing that you can learn getopt
+int main(int argv, char* argc[])
 {   
     open_ass_logs();
     
-    const char* path_to_codes = name_of_input_file(argc, argv[1]);
-    const char* path_to_executable_file = "executable_file.txt";
-    const char* path_to_executable_file_bin = "executable_file.bin";
+    const char* path_to_codes = name_of_input_file(argc, argv[1]); // ToDo: parse flags
+    const char* path_to_executable_file_bin = "executable_file.bin"; // ToDo: argv
 
     FILE* file_text = fopen(path_to_codes, "r");
-    assert(file_text != NULL);
+    CHECK_CONDITION(file_text != 0);
 
-    FILE* executable_file     = fopen(path_to_executable_file, "w");
+    FILE* executable_file     = fopen(path_to_executable_file_bin, "w");
     FILE* executable_file_bin = fopen(path_to_executable_file_bin, "wb");
-    assert(executable_file != NULL);
-    assert(executable_file_bin != NULL);
+    CHECK_CONDITION(executable_file != 0);
+    CHECK_CONDITION(executable_file_bin != 0);
 
     ass_info info_of_codes = {};
 

@@ -5,10 +5,10 @@
 #include <sys/stat.h>
 #include <math.h>
 #include <ctype.h>
-#include "../include/debug.h"
-#include "../include/asm.h"
+#include <debug.h>
+#include <asm.h>
 
-void compile(FILE *executable_file, ass_info *info_of_codes)
+int compile(FILE *executable_file, ass_info *info_of_codes)
 {
     size_t line = 0;
     int shift = 0;
@@ -16,12 +16,12 @@ void compile(FILE *executable_file, ass_info *info_of_codes)
     char label_name[128] = {};
     int ip = 0;
     char cmd[256] = {};
-    assert(cmd != NULL);
+    CHECK_CONDITION(cmd != 0);
 
-    #define DEF_CMD(name, num, arg, end_sym, ...)                                                               \
+    #define DEF_CMD(name, num, arg, end_sym, getarg_code,...)                                                   \
             else if (strcmp(cmd, #name) == 0)                                                                   \
             {                                                                                                   \
-                write_to_files(executable_file, info_of_codes->arr_of_commands, num, &ip, end_sym);            \
+                write_to_files(executable_file, info_of_codes->arr_of_commands, num, &ip, end_sym);             \
                                                                                                                 \
                 if(arg == 1)                                                                                    \
                     get_args(info_of_codes, args_begin, info_of_codes->arr_of_commands, &ip, executable_file);  \
@@ -63,8 +63,17 @@ void compile(FILE *executable_file, ass_info *info_of_codes)
         cmd[0] = -1;
         line++;   
     }
+    return 0;
 }
 #undef DEF_CMD
+
+#define DEF_CMD(name, num, arg, end_sym, getarg_code,...) \
+    case num:                                             \
+    {                                                     \
+        getarg_code;                                      \
+        break;                                            \
+    }
+
 
 var_ass get_args(ass_info *info_of_codes, char *text, int *arr_of_commands, int *ip, FILE* executable_file)
 {   
@@ -73,58 +82,17 @@ var_ass get_args(ass_info *info_of_codes, char *text, int *arr_of_commands, int 
 
     switch (arr_of_commands[*ip-1])
     {    
-        case PUSH_CMD:
-        {           
-            arr_of_commands[*ip-1] |= args.type;
-            fseek(executable_file, -2, SEEK_CUR);
-            fprintf(executable_file, "%d%c", arr_of_commands[*ip-1],' ');
-                        
-            arr_of_commands[*ip] = args.value;
-            fprintf(executable_file, "%d %c", arr_of_commands[(*ip)++],'\n');
-            
-            break;
-        }
-
-        case POP_CMD:
-        {   
-            arr_of_commands[*ip-1] |= args.type;
-            fseek(executable_file, -2, SEEK_CUR);
-            fprintf(executable_file, "%d%c", arr_of_commands[*ip-1],' ');
-                        
-            arr_of_commands[*ip] = args.value;
-            fprintf(executable_file, "%d %c", arr_of_commands[(*ip)++],'\n');
-            
-            break;
-        }
-
-        case JMP_CMD:
-        case JAE_CMD:
-        case JBE_CMD:
-        case JEE_CMD:
-        case JA_CMD:
-        case JB_CMD:
-        case JNE_CMD:
-        case CALL_CMD:
-        case RET_CMD:
-        {   
-            int label_ptr = 0;
-            char label_name[128] = {};
-            
-            sscanf(text, " :%s", label_name);
-            label_ptr = find_address(label_name, info_of_codes);
-
-            if (info_of_codes->labels[label_ptr].address != -1)
-                write_to_files(executable_file, info_of_codes->arr_of_commands, info_of_codes->labels[label_ptr].address, ip, '\n');
-            break;
-        }
+        #include "../include/cmd.h"
     }
     return 0;
 }
 
+#undef DEF_CMD
+
 size_t know_size_for_buff(FILE* text, const char * name_of_file)
 {
-    assert(text != NULL);
-    assert(name_of_file != NULL);
+    CHECK_CONDITION(text != 0);
+    CHECK_CONDITION(name_of_file != 0);
 
     struct stat data = {};
     stat(name_of_file, &data);
@@ -138,31 +106,33 @@ size_t know_size_for_buff(FILE* text, const char * name_of_file)
     return data.st_size;
 }
 
-void fill_info_of_exec_file(ass_info *info_of_codes, FILE* file_ptr, const char* file_path)
+int fill_info_of_exec_file(ass_info *info_of_codes, FILE* file_ptr, const char* file_path)
 {   
-    assert(info_of_codes != NULL);   //todo learn gdb
-    assert(file_ptr != NULL);
-    assert(file_path != NULL);
+    CHECK_CONDITION(info_of_codes != 0);   
+    CHECK_CONDITION(file_ptr != 0);
+    CHECK_CONDITION(file_path != 0);
 
     info_of_codes->num_commands = 0;
 
     info_of_codes->num_of_sym = know_size_for_buff(file_ptr, file_path) + 1;
-    assert(info_of_codes->num_of_sym != 0);
+    CHECK_CONDITION(info_of_codes->num_of_sym != 0);
 
     info_of_codes->buffer = (char*) calloc(info_of_codes->num_of_sym, sizeof(char));
-    assert(info_of_codes->buffer != NULL);
+    CHECK_CONDITION(info_of_codes->buffer != 0); 
     
     int test_fread = 0;
     test_fread = fread(info_of_codes->buffer, info_of_codes->num_of_sym - 1, sizeof(int), file_ptr);
     info_of_codes->buffer[info_of_codes->num_of_sym - 1] = '\0';
-    assert(test_fread !=0);
+    CHECK_CONDITION(test_fread !=0);
 
     info_of_codes->num_of_lines = make_ptr_arr_of_lines(info_of_codes);
 
     fill_labels_bad_values(info_of_codes->labels, SIZE_OF_LABELS_ARR);
 
     info_of_codes->arr_of_commands = (int*) calloc(info_of_codes->num_of_sym + 5*sizeof(int), sizeof(char));
-    assert(info_of_codes->arr_of_commands != NULL);
+    CHECK_CONDITION(info_of_codes->arr_of_commands != 0);
+
+    return 0;
 }
 
 int make_ptr_arr_of_lines(ass_info *info_of_codes)
@@ -205,7 +175,7 @@ int make_ptr_arr_of_lines(ass_info *info_of_codes)
     }
     
     info_of_codes->text = (char**) calloc(str_counter, sizeof(char*));
-    assert(info_of_codes->text != NULL);
+    CHECK_CONDITION(info_of_codes->text != 0);
 
     size_t line = 1;
     curr_sym = 0;
@@ -224,8 +194,8 @@ int make_ptr_arr_of_lines(ass_info *info_of_codes)
     return str_counter;
 }
 
-void detor_info(ass_info *info_of_codes)
-{
+void detor_info(ass_info *info_of_codes) // ToDo: maybe poison?
+{   
     free(info_of_codes->buffer);
     free(info_of_codes->arr_of_commands);
     free(info_of_codes->text);
@@ -247,27 +217,36 @@ void fill_labels_bad_values(Labels_t *labels, int size)
 {
     for (int i = 0; i < size; i++)
     {
-        labels[i].address = -1;
+        labels[i].address = POISON;
     }
-}
-
-
-FILE* open_with_no_buff(const char* name_file, const char* regime)
-{
-    FILE* file_ptr = fopen(name_file, regime);
-    assert(file_ptr != NULL);
-
-    setvbuf(file_ptr, NULL, _IONBF, 0);
-    
-    return file_ptr;
 }
 
 void write_to_files(FILE* executable_file, int *arr_of_cmd, int target_num, int *ip, char end_char)
 {
-    // printf("target_num = %d\n", target_num);
     fprintf(executable_file, "%d%c", target_num, end_char);
     arr_of_cmd[(*ip)++] = target_num;
 }
+
+#define WRITE_REG()     if (strcmp("RAX", tmp_str) == 0)            \
+                        {                                           \
+                            tmp_pair.type |= ARG_REG;               \
+                            tmp_pair.value = RAX;                   \
+                        }                                           \
+                        else if (strcmp("RBX", tmp_str) == 0)       \
+                        {                                           \
+                            tmp_pair.type |= ARG_REG;               \
+                            tmp_pair.value = RBX;                   \
+                        }                                           \
+                        else if (strcmp("RCX", tmp_str) == 0)       \
+                        {                                           \
+                            tmp_pair.type |= ARG_REG;               \
+                            tmp_pair.value = RCX;                   \
+                        }                                           \
+                        else if (strcmp("RDX", tmp_str) == 0)       \
+                        {                                           \
+                            tmp_pair.type |= ARG_REG;               \
+                            tmp_pair.value = RDX;                   \
+                        }
 
 pair get_arg(char *str)
 {   
@@ -289,7 +268,7 @@ pair get_arg(char *str)
         tmp_pair.type |= ARG_IMMED;
     }   
 
-    if ((strchr(str, '[') != NULL) && (strchr(str, ']') != NULL) && (strchr(str, '[') < strchr(str, ']'))) // todo scanf"[ %d ]"
+    if ((strchr(str, '[') != NULL) && (strchr(str, ']') != NULL) && (strchr(str, '[') < strchr(str, ']'))) 
     {
         tmp_pair.type |= ARG_RAM;
         if (sscanf(strchr(str, '[') + 1, "%d", &tmp_value) == 1)
@@ -307,6 +286,8 @@ pair get_arg(char *str)
 
     return tmp_pair;
 }
+
+#undef WRITE_REG
 
 const char *find_label_name(char *str)
 {

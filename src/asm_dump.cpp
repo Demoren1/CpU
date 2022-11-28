@@ -10,53 +10,53 @@
 #include "../include/debug.h"
 #include "../include/cpu.h"
 
-static FILE* ass_logs = 0;
+static FILE* ASS_LOGS = 0; // ToDo: USE_CAPS_WITH_GLOBAL_VARIABLES
 
 
-void open_ass_logs()
+void open_ass_logs() // ToDo: filename
 {
-    ass_logs = open_with_no_buff("ass_logs.txt", "w");
-    assert(ass_logs != NULL);
+    ASS_LOGS = fopen("ass_logs.txt", "w"); // ToDo: assert is bad!
+    assert(ASS_LOGS != NULL);
 }
 
-void close_ass_logs()
+void close_ass_logs(void)
 {
-    fclose(ass_logs);
+    fclose(ASS_LOGS);
 }
 
 void dump_ass (ass_info *info_of_codes, int size, const char* file_name, const char* func_name, int line)
-{       
-    fprintf(ass_logs, "DUMP CALLED FROM %s file, %s func, %d line \n\n", file_name, func_name, line);
+{  // ToDo: check is file opened
+    fprintf(ASS_LOGS, "DUMP CALLED FROM %s file, %s func, %d line \n\n", file_name, func_name, line);
 
-    fprintf(ass_logs, "buff_size = %zd \n", info_of_codes->num_of_sym);           
-    fprintf(ass_logs, "num of str = %zd \n", info_of_codes->num_of_lines);        
-    fprintf(ass_logs, "num_of_commands = %zd\n", info_of_codes->num_commands);
+    fprintf(ASS_LOGS, "buff_size = %zd \n", info_of_codes->num_of_sym);           
+    fprintf(ASS_LOGS, "num of str = %zd \n", info_of_codes->num_of_lines);        
+    fprintf(ASS_LOGS, "num_of_commands = %zd\n", info_of_codes->num_commands);
 
-    fputs("\n\nDUMP BUFFER\n", ass_logs);
+    fputs("\n\nDUMP BUFFER:\n\n", ASS_LOGS);
     for (size_t i = 0; i < info_of_codes->num_of_sym; i++)
     {           
         if (info_of_codes->buffer[i] == '\0')
         {
-            fprintf(ass_logs, "\n");
+            fprintf(ASS_LOGS, "\n");
             continue;
         }
-        fprintf(ass_logs, "%c", info_of_codes->buffer[i]);                         
+        fprintf(ASS_LOGS, "%c", info_of_codes->buffer[i]);                         
     }
 
-    fputs("\n\nDUMP LINES\n", ass_logs);
+    fputs("\n\nDUMP LINES:\n\n", ASS_LOGS);
     for (size_t i = 0; i < info_of_codes->num_of_lines; i++)         
-        fprintf(ass_logs,"%s\n", info_of_codes->text[i]); 
+        fprintf(ASS_LOGS,"%s\n", info_of_codes->text[i]); 
                                         
-    fputs("\n\nDUMP OF LABELS\n", ass_logs);
+    fputs("\n\nDUMP OF LABELS:\n\n", ASS_LOGS);
     for(int i = 0; i < size; i++)
     {
         if (info_of_codes->labels[i].address != -1)
         {
-            fprintf(ass_logs, "* %s = %2d   \n", info_of_codes->labels[i].label_name, info_of_codes->labels[i].address);
+            fprintf(ASS_LOGS, "* %s = %2d   \n", info_of_codes->labels[i].label_name, info_of_codes->labels[i].address);
         }
         else if (info_of_codes->labels[i].address == -1)
         {
-            fprintf(ass_logs, " %s = %2d (POISON)\n", info_of_codes->labels[i].label_name, info_of_codes->labels[i].address);
+            fprintf(ASS_LOGS, " %s = %2d (POISON)\n", info_of_codes->labels[i].label_name, info_of_codes->labels[i].address);
         }
     }
 }

@@ -4,10 +4,10 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <math.h>
-#include "../include/asm.h"
-#include "../include/stack_objects.h"
-#include "../include/debug.h"
-#include "../include/cpu.h"
+#include <asm.h>
+#include <stack_objects.h>
+#include <debug.h>
+#include <cpu.h>
 
 int main()
 {   
@@ -23,14 +23,13 @@ int main()
     FILE* file_result = fopen(path_result_of_executable, "w");
     FILE* file_result_bin = fopen(path_result_of_executable, "w");
 
-    
-    assert(exec_not_bin_file_ptr != NULL);
-    assert(stk_out_file != NULL);
-    assert(file_result != NULL);
+    CHECK_CONDITION(exec_not_bin_file_ptr != 0);
+    CHECK_CONDITION(stk_out_file != 0);
+    CHECK_CONDITION(file_result != 0);
 
-    do_not_bin_instructions(exec_not_bin_file_ptr, path_to_executable_file, file_result);
+    //do_not_bin_instructions(exec_not_bin_file_ptr, path_to_executable_file, file_result);
     
-    //do_bin_instructions(exec_bin_file_ptr, path_to_executable_file_bin, file_result);
+    do_bin_instructions(exec_bin_file_ptr, path_to_executable_file_bin, file_result);
     
     fclose(exec_not_bin_file_ptr);
     fclose(file_result);

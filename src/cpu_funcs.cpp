@@ -5,12 +5,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h>
-#include "../include/asm.h"
-#include "../include/stack_objects.h"
-#include "../include/debug.h"
-#include "../include/cpu.h"
+#include <asm.h>
+#include <stack_objects.h>
+#include <debug.h>
+#include <cpu.h>
 
-void check_executable_file(FILE *exec_file_ptr, Cpu_struct *cpu)
+int check_executable_file(FILE *exec_file_ptr, Cpu_struct *cpu)
 {
     char extension[128] = {};
 
@@ -28,16 +28,16 @@ void check_executable_file(FILE *exec_file_ptr, Cpu_struct *cpu)
     shift += delta_shift;
     sscanf(first_line + shift, "%zd", &cpu->num_of_commands);
 
-    assert(strcmp(extension,cpu->extension) == 0);
-    assert(version == cpu->version);
+    CHECK_CONDITION(strcmp(extension,cpu->extension) == 0);
+    CHECK_CONDITION(version == cpu->version);
 
-    //printf("%s %d % zd\n", extension, version, cpu->num_of_commands);
+    return 0;
 }
 
 size_t know_size_for_buff(FILE* text, const char * name_of_file)
 {
-    assert(text != NULL);
-    assert(name_of_file != NULL);
+    CHECK_CONDITION(text != 0);
+    CHECK_CONDITION(name_of_file != 0);
 
     struct stat data = {};
     stat(name_of_file, &data);
@@ -51,7 +51,7 @@ size_t know_size_for_buff(FILE* text, const char * name_of_file)
     return data.st_size;
 }
 
-void fill_cpu_struct(FILE *codes_file_ptr, Cpu_struct *cpu, const char *path_to_file)
+int fill_cpu_struct(FILE *codes_file_ptr, Cpu_struct *cpu, const char *path_to_file)
 {
     cpu->size = know_size_for_buff(codes_file_ptr, path_to_file);
 
@@ -59,9 +59,11 @@ void fill_cpu_struct(FILE *codes_file_ptr, Cpu_struct *cpu, const char *path_to_
     
     int test_fread = 0;
     test_fread = fread(cpu->buffer, sizeof(char), cpu->size, codes_file_ptr);
-    assert(test_fread != 0);
+    CHECK_CONDITION(test_fread != 0);
 
     make_num_buffer(cpu);
+
+    return 0;
 }
 
 void dtor_exec_no_bin(Cpu_struct *cpu)
@@ -87,11 +89,11 @@ void make_num_buffer(Cpu_struct *cpu)
     }
 }
 
-void do_not_bin_instructions(FILE* exec_not_bin_file_ptr, const char* path_to_executable_file, FILE* file_result)
+int do_not_bin_instructions(FILE* exec_not_bin_file_ptr, const char* path_to_executable_file, FILE* file_result)
 {
-    assert(exec_not_bin_file_ptr != NULL);
-    assert(path_to_executable_file != NULL);
-    assert(file_result != NULL);
+    CHECK_CONDITION(exec_not_bin_file_ptr != 0);
+    CHECK_CONDITION(path_to_executable_file != 0);
+    CHECK_CONDITION(file_result != 0);
        
     struct Cpu_struct cpu ={};
 
@@ -111,6 +113,8 @@ void do_not_bin_instructions(FILE* exec_not_bin_file_ptr, const char* path_to_ex
     stack_dtor(&cpu.stack);
     stack_dtor(&cpu.func_stack);
     close_logs();
+
+    return 0;
 }
 
 void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
@@ -121,12 +125,12 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
 
     DUMP_CPU(*cpu, ip, stack); 
 
-#define DEF_CMD(name, num, arg, end_sym, ...)                                       \
-        case num:                                                                   \
+#define DEF_CMD(name, num, arg, end_sym, getarg_code,...)                          \
+        case num:                                                                  \
             __VA_ARGS__                                                            \
-            break;                                                                  \
+            break;                                                                 \
 
-    while (ip < cpu->num_of_commands)
+    while (ip < cpu->num_of_commands) // ToDo: use file size
     {   elem num1 = 0, num2 = 0, num = 0;
         cmd = cpu->num_buffer[ip++];
         full_cmd = cmd;
@@ -134,8 +138,6 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
 
         // printf("cmd = %0x (%d)\n", cmd, cmd);
         // printf("full_cmd = %0x(%d) \n", full_cmd, full_cmd);
-
-        // sleep(1);
         
         if (cmd == HLT_CMD)
         {
@@ -151,11 +153,11 @@ void execute_commands(Cpu_struct *cpu, Stack *stack, FILE* file_result)
 #undef DEF_CMD
 
 
-void do_bin_instructions(FILE* exec_bin_file_ptr, const char* path_to_executable_file_bin, FILE* file_result)
+int do_bin_instructions(FILE* exec_bin_file_ptr, const char* path_to_executable_file_bin, FILE* file_result)
 {   
-    assert(exec_bin_file_ptr != NULL);
-    assert(path_to_executable_file_bin != NULL);
-    assert(file_result != NULL);
+    CHECK_CONDITION(exec_bin_file_ptr != 0);
+    CHECK_CONDITION(path_to_executable_file_bin != 0);
+    CHECK_CONDITION(file_result != 0);
 
     struct Cpu_struct cpu ={};  
 
@@ -177,43 +179,54 @@ void do_bin_instructions(FILE* exec_bin_file_ptr, const char* path_to_executable
     stack_dtor(&cpu.stack);
     stack_dtor(&cpu.func_stack);
     close_logs();
+
+    return 0;
 }
 
-void check_executable_bin_file(FILE *exec_file_bin, Cpu_struct *cpu)
+int check_executable_bin_file(FILE *exec_file_bin, Cpu_struct *cpu)
 {
-    int first_line[first_line_len] = {};   
+    int first_line[FIRST_LINE_LEN] = {};   
     
     fread(first_line, sizeof(int), 2, exec_file_bin);
     
-    assert(first_line[0] == EXTENSION[0] + EXTENSION[1] * 256);
-    assert(first_line[1] == VERSION);
+    CHECK_CONDITION(first_line[0] == EXTENSION[0] + EXTENSION[1] * 256); 
+    CHECK_CONDITION(first_line[1] == VERSION);
+
+    return 0;
 }
 
-void fill_cpu_struct_bin (FILE *exec_file_bin, Cpu_struct *cpu, const char *path_to_bin_file)
+int fill_cpu_struct_bin (FILE *exec_file_bin, Cpu_struct *cpu, const char *path_to_bin_file)
 {   
-    assert(exec_file_bin != NULL);
-    assert(cpu != NULL);
-    assert(path_to_bin_file != NULL);
+    CHECK_CONDITION(exec_file_bin != 0);
+    CHECK_CONDITION(cpu != 0);
+    CHECK_CONDITION(path_to_bin_file != 0);
 
-    find_num_of_commands(exec_file_bin, cpu);
+    find_num_of_commands(exec_file_bin, cpu, path_to_bin_file);
     
     cpu->size = 0;
 
     cpu->num_buffer = (int*) calloc(cpu->num_of_commands, sizeof(int));
 
     fread(cpu->num_buffer, sizeof(int), cpu->num_of_commands, exec_file_bin);
+
+    return 0;
 }
 
-void find_num_of_commands(FILE *exec_file_bin, Cpu_struct *cpu)
+int find_num_of_commands(FILE *exec_file_bin, Cpu_struct *cpu, const char *name_of_file)
 {
-    int first_line[first_line_len] = {};
-    assert(first_line != NULL);
+    int max_commands = know_size_for_buff(exec_file_bin, name_of_file);
+    max_commands /= sizeof(int);
+
+    int first_line[FIRST_LINE_LEN] = {};
+    CHECK_CONDITION(first_line != 0);
     
     int test_fread = 0;
     test_fread = fread(first_line, sizeof(int), 1, exec_file_bin);
-    assert(test_fread != 0);
+    CHECK_CONDITION(test_fread != 0);
 
-    cpu->num_of_commands = first_line[0];
+    cpu->num_of_commands = (first_line[0] < max_commands) ? max_commands : first_line[0];
+    
+    return 0;
 }
 
 void dtor_exec_bin(Cpu_struct *cpu)
