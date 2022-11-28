@@ -3,7 +3,11 @@ SRC_DIR = ./src/
 OBJ_DIR = ./obj/
 CC = g++
 
-CFLAGS= -save-temps -Wall  -fsanitize=address -g #-D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
+# RELEASE_FLAGS := -DNDEBUG
+# release:
+# 	g++ $(RELEASE_FLAGS)
+
+CFLAGS= #-save-temps -Wall -Wextra -fsanitize=address -g #-D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
 -Wc++14-compat -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts -Wconditionally-supported \
 -Wconversion -Wctor-dtor-privacy -Wempty-body -Wfloat-equal -Wformat-nonliteral -Wformat-security -Wformat-signedness -Wformat=2 -Winline -Wlogical-op \
 -Wnon-virtual-dtor -Wopenmp-simd -Woverloaded-virtual -Wpacked -Wpointer-arith -Winit-self -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo \
@@ -12,6 +16,9 @@ CFLAGS= -save-temps -Wall  -fsanitize=address -g #-D _DEBUG -ggdb3 -std=c++20 -O
 -Wno-old-style-cast -Wno-varargs -Wstack-protector -fcheck-new -fsized-deallocation -fstack-check -fstack-protector -fstrict-overflow -flto-odr-type-merging \
 -fno-omit-frame-pointer -fPIE -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr \
 -pie -Wlarger-than=8192 -Wstack-usage=8192
+
+#include
+INCLUDE_PATH = -I./include/
 
 #sources
 ASM_SRC := $(SRC_DIR)ass_funcs.cpp $(SRC_DIR)assembler.cpp $(SRC_DIR)asm_dump.cpp $(SRC_DIR)extension_const.cpp
@@ -26,16 +33,16 @@ ASM_EXE := assembler
 CPU_EXE := cpu
 
 $(ASM_EXE) : $(ASM_OBJ) 
-	$(CC) $(CFLAGS) $(ASM_OBJ) -o $(ASM_EXE)
+	@$(CC) $(CFLAGS) $(ASM_OBJ) -o $(ASM_EXE)
 
 $(OBJ_DIR)%.o : $(SRC_DIR)%.cpp 
-	$(CC) -c $< -o $@
+	@$(CC) $(INCLUDE_PATH) -c $< -o $@
 
 $(CPU_EXE) : $(CPU_OBJ) 
-	$(CC) $(CFLAGS) $(CPU_OBJ) -o $(CPU_EXE)
+	@$(CC) $(CFLAGS) $(CPU_OBJ) -o $(CPU_EXE)
 
 $(OBJ_DIR)%.o : $(SRC_DIR)%.cpp
-	$(CC) -c $< -o $@
+	@$(CC) $(INCLUDE_PATH) -c $< -o $@
 
 mkdir :
 	@mkdir $(OBJ_DIR) -p
