@@ -12,7 +12,8 @@
 // ./asm filename -o file.bin
 // ./asm -o file.bin filename
 // After releasing that you can learn getopt
-int main(int argv, char* argc[])
+
+int main(int argc, char* argv[])
 {   
     open_ass_logs();
     
